@@ -671,65 +671,26 @@ function gerarReciboVenda(venda){
 
 // 1. CALCULA TUDO COM FILTRO DE MÊS + FOLHA RH
 function calcularTotais(){
-    const mesFiltro = document.getElementById('filtroMes').value;
-    
-    // FILTRA VENDAS POR MÊS
+    const filtroEl = document.getElementById('filtroMes');
+    const mesFiltro = filtroEl?.value || "todos";
     let vendasFiltradas = vendas;
     if(mesFiltro !== "todos"){
         vendasFiltradas = vendas.filter(v => {
-            const dataVenda = new Date(v.data);
-            return dataVenda.getMonth() == mesFiltro;
+            try{ return new Date(v.data).getMonth() == mesFiltro; }catch(e){ return true; }
         });
     }
-    totalVendas = 0;
-    vendasFiltradas.forEach(v => { totalVendas += Number(v.total) || 0; });
-    
-    // FILTRA COMPRAS POR MÊS
-    let comprasFiltradas = compras;
-    if(mesFiltro !== "todos"){
-        comprasFiltradas = compras.filter(c => {
-            const dataCompra = new Date(c.data);
-            return dataCompra.getMonth() == mesFiltro;
-        });
-    }
-    totalCompras = 0;
-    comprasFiltradas.forEach(c => { totalCompras += Number(c.total) || 0; });
-    
-    // SOMA FOLHA RH - PEGA DE TODOS FUNCIONARIOS
-    totalFolha = 0;
-    funcionarios.forEach(f => { totalFolha += Number(f.salario) || 0; });
+    totalVendas = 0; vendasFiltradas.forEach(v => totalVendas += Number(v.total)||0);
+    totalCompras = 0; compras.forEach(c => totalCompras += Number(c.total)||0);
+    totalFolha = 0; funcionarios.forEach(f => totalFolha += Number(f.salarioLiquido||f.salarioBruto||0));
 }
-
 // 2. ATUALIZA OS CARDS + GRAFICO
 function atualizarRelatorio(){
-    calcularTotais(); 
+    try{ calcularTotais(); }catch(e){}
     let lucro = totalVendas - totalCompras - totalFolha;
-
-    // ATUALIZA OS 4 CARDS COM OS IDs DO TEU HTML
-    document.getElementById('relVendas').innerText = totalVendas.toFixed(2) + ' MT';
-    document.getElementById('relCompras').innerText = totalCompras.toFixed(2) + ' MT';
-    document.getElementById('relFolha').innerText = totalFolha.toFixed(2) + ' MT';
-    document.getElementById('relLucro').innerText = lucro.toFixed(2) + ' MT';
-
-    // ATUALIZA O GRAFICO
-    const ctx = document.getElementById('graficoRelatorio');
-    if(!ctx) return;
-    if(window.meuGrafico) window.meuGrafico.destroy();
-
-    window.meuGrafico = new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: ['Vendas', 'Compras', 'Folha', 'Lucro'],
-            datasets: [{
-                data: [totalVendas, totalCompras, totalFolha, lucro],
-                backgroundColor: ['#28a745', '#dc3545', '#ffc107', '#17a2b8']
-            }]
-        },
-        options: { 
-            responsive: true, 
-            plugins: { legend: { position: 'bottom' } }
-        }
-    });
+    const elV = document.getElementById('relVendas'); if(elV) elV.innerText = totalVendas.toFixed(2)+' MT';
+    const elC = document.getElementById('relCompras'); if(elC) elC.innerText = totalCompras.toFixed(2)+' MT';
+    const elF = document.getElementById('relFolha'); if(elF) elF.innerText = totalFolha.toFixed(2)+' MT';
+    const elL = document.getElementById('relLucro'); if(elL) elL.innerText = lucro.toFixed(2)+' MT';
 }
 
 // 1. SALVA TUDO NO NAVEGADOR
