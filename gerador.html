@@ -5,6 +5,8 @@ Meses: <input id="meses" type="number" value="1" style="padding:10px"><br><br>
 <button onclick="gerar()" style="padding:12px 20px;background:#1565C0;color:white;border:none;border-radius:8px;font-weight:bold">Gerar Chave</button>
 <p id="out" style="background:#eee;padding:15px;word-break:break-all;margin-top:15px"></p>
 <script>
+  let senha = prompt('Senha de Admin:');
+if(senha !== 'M@TOLA2026'){ document.body.innerHTML='Acesso negado'; throw new Error('negado'); }
 function gerar(){
   let emp = document.getElementById('empresa').value.trim().toUpperCase().replace(/\s+/g,'_') || 'CLIENTE';
   let meses = parseInt(document.getElementById('meses').value)||1;
