@@ -1,57 +1,32 @@
-// FIX FUNCIONARIO V2 - GESTAOMAX
-(function() {
-  function getFuncionarios() {
-    const keys = ["funcionarios", "gestaomax_funcionarios", "rh_funcionarios", "listaFuncionarios"];
-    for (let k of keys) {
-      try { let data = JSON.parse(localStorage.getItem(k) || "[]");
-        if (data && data.length > 0) return data;
-      } catch(e){}
-    }
-    return window.funcionarios || window.listaFuncionarios || [];
+// FIX V3 - SEM ERRO DE NULL
+(function(){
+  function getFuncs(){
+    try{
+      let d=JSON.parse(localStorage.getItem("funcionarios")||"[]");
+      if(d.length) return d;
+    }catch(e){}
+    try{
+      let d=JSON.parse(localStorage.getItem("gestaomax_funcionarios")||"[]");
+      if(d.length) return d;
+    }catch(e){}
+    return window.funcionarios||[];
   }
-  function normaliza(s){ return (s||"").toString().toLowerCase().trim(); }
-
-  window.verMinhaSituacao = function() {
-    let termo = "";
-    const inputs = document.querySelectorAll('input');
-    for (let el of inputs) { if (el.value) { termo = el.value; break; } }
-    termo = normaliza(termo);
-    if (!termo) { alert("Digite seu codigo ou nome."); return; }
-
-    const funcionarios = getFuncionarios();
-    let f = funcionarios.find(func => {
-      const codigo = normaliza(func.codigo || func.id || func.matricula);
-      const nome = normaliza(func.nome || func.name);
-      return codigo === termo || nome === termo || nome.includes(termo) || codigo.includes(termo);
-    });
-
-    if (!f) { alert("Funcionário não encontrado. Você tem "+funcionarios.length+" cadastrados: "+funcionarios.map(x=>x.nome||x.name).join(", ")); return; }
-
-    let salarioBase = f.salarioBase || f.salario_base || f.salario || 0;
-    let faltas = f.faltas || f.numeroFaltas || 0;
-    let bonus = f.bonus || 0;
-    let liquido = f.salarioLiquido || f.liquido || (parseFloat(salarioBase)+parseFloat(bonus)-(parseFloat(faltas)*(parseFloat(salarioBase)/30)));
-
-    let old = document.getElementById("modalFuncionarioRestrito"); if(old) old.remove();
-    let modal = document.createElement("div");
-    modal.id = "modalFuncionarioRestrito";
-    modal.style = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:15px;";
-    modal.innerHTML = `<div style="background:white;border-radius:16px;max-width:400px;width:100%;overflow:hidden;">
-        <div style="background:#1565C0;color:white;padding:20px;text-align:center;">
-          <h2 style="margin:0;">${f.nome||"Funcionario"}</h2><p>${f.cargo||""} - ${f.codigo||f.id||""}</p>
-        </div>
-        <div style="padding:20px;">
-          <div style="background:#f5f7ff;border-radius:10px;padding:15px;margin-bottom:12px;display:flex;justify-content:space-between;"><span>Salário Base:</span><strong>${Number(salarioBase).toLocaleString('pt-MZ')} MT</strong></div>
-          <div style="background:#fff3e0;border-radius:10px;padding:15px;margin-bottom:12px;display:flex;justify-content:space-between;"><span>Nº de Faltas:</span><strong>${faltas}</strong></div>
-          <div style="background:#e8f5e9;border-radius:10px;padding:15px;margin-bottom:12px;display:flex;justify-content:space-between;"><span>Bônus:</span><strong>${Number(bonus).toLocaleString('pt-MZ')} MT</strong></div>
-          <div style="background:#1565C0;color:white;border-radius:10px;padding:15px;display:flex;justify-content:space-between;font-size:18px;"><span>Líquido:</span><strong>${Number(liquido).toLocaleString('pt-MZ')} MT</strong></div>
-          <button onclick="document.getElementById('modalFuncionarioRestrito').remove()" style="width:100%;margin-top:15px;padding:14px;background:#111;color:white;border:none;border-radius:10px;font-weight:bold;">Fechar</button>
-        </div></div>`;
-    document.body.appendChild(modal);
+  window.verMinhaSituacao=function(){
+    // pega o valor digitado na hora, com segurança
+    let termo = (document.querySelector('#codigoFuncionario')?.value || document.querySelector('input[placeholder*="digo"]')?.value || prompt("Digite seu nome ou código:") || "").toLowerCase().trim();
+    if(!termo){ alert("Digite seu nome"); return; }
+    let funcs=getFuncs();
+    if(!funcs.length){ alert("Nenhum funcionário cadastrado ainda. Entre como DONO primeiro e cadastre."); return; }
+    let f=funcs.find(x=> (x.nome||"").toLowerCase().includes(termo) || (x.codigo||x.id||"").toLowerCase()===termo );
+    if(!f){ alert("Não encontrado. Cadastrados: "+funcs.map(x=>x.nome).join(", ")); return; }
+    let base=f.salarioBase||f.salario||0, faltas=f.faltas||0, bonus=f.bonus||0;
+    let liquido=f.salarioLiquido || (Number(base)+Number(bonus)-(Number(faltas)*(Number(base)/30)));
+    let old=document.getElementById("modalF"); if(old) old.remove();
+    let m=document.createElement("div"); m.id="modalF";
+    m.style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:15px;";
+    m.innerHTML=`<div style="background:#fff;border-radius:16px;max-width:400px;width:100%;overflow:hidden"><div style="background:#1565C0;color:#fff;padding:20px;text-align:center"><h2>${f.nome}</h2><p>${f.codigo||""}</p></div><div style="padding:20px"><p><b>Salário Base:</b> ${base} MT</p><p><b>Faltas:</b> ${faltas}</p><p><b>Bônus:</b> ${bonus} MT</p><div style="background:#1565C0;color:#fff;padding:15px;border-radius:10px;margin-top:10px"><b>Líquido: ${Number(liquido).toFixed(2)} MT</b></div><button onclick="this.closest('#modalF').remove()" style="width:100%;margin-top:15px;padding:14px;background:#111;color:#fff;border:none;border-radius:10px">Fechar</button></div></div>`;
+    m.addEventListener("click",e=>{if(e.target===m) m.remove()});
+    document.body.appendChild(m);
   };
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll("button").forEach(b => {
-      if (b.textContent.toLowerCase().includes("minha situa")) b.onclick = window.verMinhaSituacao;
-    });
-  });
+  console.log("FIX V3 OK - funcionarios:", getFuncs().length);
 })();
