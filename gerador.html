@@ -5,8 +5,14 @@ Meses: <input id="meses" type="number" value="1" style="padding:10px"><br><br>
 <button onclick="gerar()" style="padding:12px 20px;background:#1565C0;color:white;border:none;border-radius:8px;font-weight:bold">Gerar Chave</button>
 <p id="out" style="background:#eee;padding:15px;word-break:break-all;margin-top:15px"></p>
 <script>
-  let senha = prompt('Senha de Admin:');
-if(senha !== 'M@TOLA2026'){ document.body.innerHTML='Acesso negado'; throw new Error('negado'); }
+(function(){
+  let ok = false;
+  for(let i=0;i<3;i++){
+    let s = prompt('Senha de Admin: (tentativa '+(i+1)+'/3)');
+    if(s === 'M@TOLA2026'){ ok = true; break; }
+  }
+  if(!ok){ document.body.innerHTML='<h2 style="color:red;text-align:center;margin-top:100px">Acesso negado</h2>'; return; }
+})();
 function gerar(){
   let emp = document.getElementById('empresa').value.trim().toUpperCase().replace(/\s+/g,'_') || 'CLIENTE';
   let meses = parseInt(document.getElementById('meses').value)||1;
@@ -15,6 +21,6 @@ function gerar(){
   let base = `GMAX-${emp}-${expStr}`;
   let check = 0; for(let c of base) check+=c.charCodeAt(0);
   let chave = `${base}-${(check%97).toString().padStart(2,'0')}`;
-  document.getElementById('out').innerHTML = `Empresa: ${emp}<br>Expira: ${exp.toLocaleDateString()}<br><br><b style="font-size:18px">${chave}</b>`;
+  document.getElementById('out').innerHTML = `Empresa: ${emp}<br>Expira: ${exp.toLocaleDateString()}<br><br><b style="font-size:18px">${chave}</b><br><br><button onclick="navigator.clipboard.writeText('${chave}')" style="padding:8px">Copiar</button>`;
 }
 </script></body></html>
