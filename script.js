@@ -110,3 +110,49 @@ setTimeout(()=>{
     if(b.textContent.toLowerCase().includes('ver minha')) b.onclick = window.verMinhaSituacao;
   });
 },800);
+
+// FUNÇÕES QUE FALTAVAM - FIX DO BUG
+function baixarBackup(){
+  let dados = {
+    funcionarios: localStorage.getItem(getKeyFuncionarios()),
+    empresa: getEmpresaAtual(),
+    data: new Date().toISOString()
+  };
+  let blob = new Blob([JSON.stringify(dados)], {type:'application/json'});
+  let url = URL.createObjectURL(blob);
+  let a = document.createElement('a');
+  a.href = url; a.download = `backup_${getEmpresaAtual()}_${new Date().toISOString().slice(0,10)}.json`; a.click();
+}
+
+function carregarBackup(event){
+  const file = event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const dados = JSON.parse(e.target.result);
+      if(dados.funcionarios){
+        localStorage.setItem(getKeyFuncionarios(), dados.funcionarios);
+        localStorage.setItem('funcionariosRH', dados.funcionarios);
+      }
+      alert("Backup carregado!");
+      location.reload();
+    }catch(err){
+      alert("Arquivo inválido!");
+    }
+  };
+  reader.readAsText(file);
+}
+
+// FIX do salvarCfg que tava dando erro de cfgDinheiro
+window.salvarCfg = function(){
+  let cfg = {
+    mpesa: document.getElementById('cfgMpesa').value,
+    emola: document.getElementById('cfgEmola').value,
+    banco: document.getElementById('cfgBanco').value
+  };
+  localStorage.setItem('gm_cfg', JSON.stringify(cfg));
+  localStorage.setItem('gm_config_pag', JSON.stringify(cfg));
+  alert('Números salvos!');
+  location.reload();
+}
