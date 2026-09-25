@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>GESTÃOMAX - Rh, Stock & Vendas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="icon" href="icon.png">
     <script src="jspdf.min.js"></script>
@@ -22,8 +23,6 @@
     </style>
 </head>
 <body class="bg-light">
-
-<!-- TELA DE LOGIN ATUALIZADA -->
 <div id="telaLogin" class="container mt-5" style="max-width: 400px;">
     <div class="card shadow">
        <div class="card-header bg-primary text-white text-center" style="padding: 20px;">
@@ -37,7 +36,6 @@
                 <button class="role-btn flex-fill" id="rFunc" onclick="setRole('func')">Funcionário</button>
                 <button class="role-btn flex-fill" id="rCliente" onclick="setRole('cliente')">Cliente</button>
             </div>
-
             <div id="loginDono">
                 <label>Usuario</label>
                 <input type="text" id="usuario" class="form-control" placeholder="admin" value="admin">
@@ -46,24 +44,18 @@
                 <button onclick="fazerLogin()" class="btn btn-primary w-100">Entrar</button>
                 <p id="erroLogin" class="text-danger mt-2 text-center" style="display:none;">Usuario ou senha incorretos!</p>
             </div>
-
             <div id="loginFunc" style="display:none;">
                 <label>Código / Nome do Funcionário</label>
                 <input type="text" id="codFunc" class="form-control" placeholder="Ex: F001 ou João">
                 <button onclick="entrarFunc()" class="btn btn-primary w-100 mt-2">Ver Minha Situação</button>
-                <small class="text-muted">Funcionário só pode ver sua situação e nada mais.</small>
             </div>
-
             <div id="loginCliente" style="display:none;">
                 <p class="text-center text-muted">Veja produtos, preços e formas de pagamento.</p>
                 <button onclick="entrarCliente()" class="btn w-100 text-white" style="background:#25D366">Ver Catálogo da Loja</button>
-                <small class="text-muted">Cliente só pode ver o produto e o preço.</small>
             </div>
         </div>
     </div>
 </div>
-
-<!-- TEU SISTEMA ORIGINAL - NÃO MEXI EM NADA, SÓ COLOQUEI DENTRO DO ID sistema -->
 <div id="sistema" style="display:none;">
     <div class="container mt-4">
         <div class="card shadow">
@@ -72,218 +64,108 @@
             <button onclick="logout()" class="btn btn-danger btn-sm">Sair</button>
         </div>
         <div class="card-body">
-            <!-- CONFIG PAGAMENTOS - NOVO, SÓ DONO VÊ -->
             <div class="card mb-3 p-3 bg-light">
-                <h6>⚙️ Configurar Pagamentos da Loja (aparece para cliente)</h6>
+                <h6>⚙️ Configurar Pagamentos da Loja</h6>
                 <div class="row g-2">
-                    <div class="col-md-3"><input id="cfgMpesa" class="form-control form-control-sm" placeholder="M-Pesa ex: 84 123 4567"></div>
-                    <div class="col-md-3"><input id="cfgEmola" class="form-control form-control-sm" placeholder="Emola ex: 82 123 4567"></div>
-                    <div class="col-md-3"><input id="cfgBanco" class="form-control form-control-sm" placeholder="Conta Bancária ex: BCI 123456"></div>
+                    <div class="col-md-3"><input id="cfgMpesa" class="form-control form-control-sm" placeholder="M-Pesa"></div>
+                    <div class="col-md-3"><input id="cfgEmola" class="form-control form-control-sm" placeholder="Emola"></div>
+                    <div class="col-md-3"><input id="cfgBanco" class="form-control form-control-sm" placeholder="Conta Bancária"></div>
                     <div class="col-md-3"><button onclick="salvarCfg()" class="btn btn-primary btn-sm w-100">Salvar Números</button></div>
                 </div>
             </div>
-
-            <!-- BOTÃO NOVO - INTELIGÊNCIA DO CADERNO DO Z -->
-<div class="card mb-3 p-3 bg-light" style="border:2px solid #7c3aed">
- <h6>🧠 PAINEL de PREVISÃO</h6>
- <button onclick="mostrarInteligencia()" class="btn w-100 text-white" style="background:#7c3aed">Ver Escala Inteligente + Alerta Produtividade</button>
- <div id="areaInteligencia"></div>
-</div>
-
-            <div class="mb-3">
-                <button onclick="exportarFuncionarios()" class="btn btn-success btn-sm me-2 nao-imprimir">Exportar Funcionarios</button>
-                <button onclick="exportarFolha()" class="btn btn-info btn-sm nao-imprimir">Exportar Folha</button>
-                <button onclick="imprimirFolha()" class="btn btn-warning btn-sm nao-imprimir">Imprimir Folha</button>
+            <div class="card mb-3 p-3 bg-light" style="border:2px solid #7c3aed">
+             <h6>🧠 PAINEL de PREVISÃO</h6>
+             <button onclick="mostrarInteligencia()" class="btn w-100 text-white" style="background:#7c3aed">Ver Escala Inteligente + Alerta Produtividade</button>
+             <div id="areaInteligencia"></div>
             </div>
-
-            <div class="card mb-3 p-3 bg-light" style="border:2px solid #f59e0b; margin-top:15px">
- <h6>🛒 Compras Inteligentes - Previsão de Stock</h6>
- <button onclick="mostrarCompras()" class="btn w-100 text-white" style="background:#f59e0b">Ver o que precisa comprar esta semana</button>
- <div id="areaCompras"></div>
-</div>
-
-            <!-- TODO O RESTO DO TEU CODIGO FICA IGUAL A PARTIR DAQUI -->
+            <div class="mb-3">
+                <button onclick="exportarFuncionarios()" class="btn btn-success btn-sm me-2">Exportar Funcionarios</button>
+                <button onclick="exportarFolha()" class="btn btn-info btn-sm">Exportar Folha</button>
+                <button onclick="imprimirFolha()" class="btn btn-warning btn-sm">Imprimir Folha</button>
+            </div>
+            <div class="card mb-3 p-3 bg-light" style="border:2px solid #f59e0b;">
+             <h6>🛒 Compras Inteligentes</h6>
+             <button onclick="mostrarCompras()" class="btn w-100 text-white" style="background:#f59e0b">Ver o que precisa comprar esta semana</button>
+             <div id="areaCompras"></div>
+            </div>
             <div id="nao-imprimir">
-                   <h4>Cadastrar Funcionario</h4>
+            <h4>Cadastrar Funcionario</h4>
             <div class="row g-3 mb-3">
                 <div class="col-md-3"><input id="nome" class="form-control" placeholder="Nome Completo"></div>
-                <div class="col-md-2">
-                  <select id="tipoInstituicao" class="form-select"><option value="">Tipo</option><option value="EMP">Empresa</option><option value="ESC">Escola</option></select>
-                </div>
+                <div class="col-md-2"><select id="tipoInstituicao" class="form-select"><option value="">Tipo</option><option value="EMP">Empresa</option><option value="ESC">Escola</option></select></div>
                 <div class="col-md-2"><select id="departamento" class="form-select"><option value="">Departamento</option></select></div>
                 <div class="col-md-2"><input id="salario" type="number" class="form-control" placeholder="Salario Base MT"></div>
                 <div class="col-md-2"><input id="faltas" type="number" class="form-control" placeholder="Faltas"></div>
                 <div class="col-md-2"><input id="bonus" type="number" class="form-control" placeholder="Bonus MT"></div>
             </div>
             <button onclick="adicionarFuncionario()" class="btn btn-primary mb-4">Adicionar</button>
-
             <h4>Lista de Funcionarios</h4>
             <div class="row mb-3">
                 <div class="col-md-5"><input type="text" id="TC" class="form-control" placeholder="Pesquisar por nome..."></div>
-                <div class="col-md-3"><select id="Direcao" class="form-select"><option value="">Selecione</option><optgroup label="EMPRESAS"><option>Vendas</option><option>Financas</option><option>RH</option><option>TI</option><option>Mkt</option><option>Logistica</option><option>Adm</option></optgroup><optgroup label="ESCOLAS"><option>Direcao</option><option>Secretaria</option><option>Prof 1C</option><option>Prof 2C</option><option>Prof Sec</option><option>Pedagogico</option><option>Contab Esc</option><option>Serv Gerais</option><option>Seguranca</option><option>Cantina</option></optgroup></select></div>
+                <div class="col-md-3"><select id="Direcao" class="form-select"><option value="">Selecione</option><option>Vendas</option><option>Financas</option><option>RH</option><option>TI</option></select></div>
                 <div class="col-md-4"><button onclick="limparFiltros()" class="btn btn-secondary btn-sm">Limpar</button><button onclick="listarFuncionarios()" class="btn btn-success btn-sm">Listar Todos</button></div>
             </div>
             </div>
-
-            <button onclick="gerarTodosRecibos()" class="btn btn-success btn-sm mb-3 nao-imprimir"> Gerar Todos os Recibos</button>
-            <button onclick="baixarBackup()" class="btn btn-warning btn-sm mb-3 nao-imprimir">Baixar Backup</button>
+            <button onclick="gerarTodosRecibos()" class="btn btn-success btn-sm mb-3">Gerar Todos os Recibos</button>
+            <button onclick="baixarBackup()" class="btn btn-warning btn-sm mb-3">Baixar Backup</button>
             <input type="file" id="carregarArquivo" style="display:none" onchange="carregarBackup(event)">
-            <button onclick="document.getElementById('carregarArquivo').click()" class="btn btn-secondary btn-sm mb-3 nao-imprimir">Carregar Backup</button>
-
+            <button onclick="document.getElementById('carregarArquivo').click()" class="btn btn-secondary btn-sm mb-3">Carregar Backup</button>
             <div class="table-responsive">
             <table class="table table-striped table-hover">
-  <thead class="table-dark"><tr><th>QR</th><th>Nome</th><th>Departamento</th><th>Bruto</th><th onclick="ordenarTabela('salarioLiquido')" style="cursor:pointer;">Liquido</th><th>Recibo</th><th>Acao</th></tr></thead>
+  <thead class="table-dark"><tr><th>QR</th><th>Nome</th><th>Departamento</th><th>Bruto</th><th>Liquido</th><th>Recibo</th><th>Acao</th></tr></thead>
   <tbody id="tabelaFuncionarios"></tbody>
 </table>
 </div>
-
-<ul class="nav nav-tabs mt-4 nao-imprimir" id="menuAbas">
+<ul class="nav nav-tabs mt-4" id="menuAbas">
   <li class="nav-item"><button class="nav-link active" type="button" onclick="mostrarAba('abaRH')">RH / Folha</button></li>
   <li class="nav-item"><button class="nav-link" type="button" onclick="mostrarAba('abaProdutos')">Produtos / Estoque</button></li>
   <li class="nav-item"><button class="nav-link" type="button" onclick="mostrarAba('abaVendas')">Vendas</button></li>
   <li class="nav-item"><button class="nav-link" type="button" onclick="mostrarAba('abaCompras')">Compras</button></li>
   <li class="nav-item"><button class="nav-link" type="button" onclick="mostrarAba('abaRelatorios')">Relatorios</button></li>
 </ul>
-
-<div id="abaRH"><h5 class="mt-3">Total da Folha: <span id="totalFolha" class="text-success">0.00 MT</span></h5><canvas id="graficoDepto" style="max-height:300px; margin-top:20px;"></canvas></div>
-
+<div id="abaRH"><h5 class="mt-3">Total da Folha: <span id="totalFolha" class="text-success">0.00 MT</span></h5><canvas id="graficoDepto"></canvas></div>
 <div id="abaProdutos" style="display:none;" class="mt-3">
     <h3>Cadastro de Produtos</h3>
     <div class="row g-2 mb-3"><div class="col-md-3"><input type="text" id="nomeProd" class="form-control" placeholder="Nome do Produto"></div><div class="col-md-2"><input type="number" id="precoCompra" class="form-control" placeholder="Preco Compra"></div><div class="col-md-2"><input type="number" id="precoVenda" class="form-control" placeholder="Preco Venda"></div><div class="col-md-2"><input type="number" id="estoque" class="form-control" placeholder="Stock"></div><div class="col-md-3"><button class="btn btn-success w-100" onclick="adicionarProduto()">Adicionar</button></div></div>
-    <h5>Total em Estoque: <span id="totalEstoque">0.00 MT</span></h5>
-    <input type="text" id="pesquisaProd" onkeyup="pesquisarProduto()" placeholder="Pesquisar produto..." class="form-control mb-2">
-    <table class="table table-striped table-bordered"><thead class="table-dark"><tr><th>Produto</th><th>Stock</th><th>Custo</th><th>Preco</th><th>Editar</th><th>Excluir</th></tr></thead><tbody id="tabelaProdutos"></tbody></table>
+    <table class="table table-striped"><thead class="table-dark"><tr><th>Produto</th><th>Stock</th><th>Custo</th><th>Preco</th><th>Editar</th><th>Excluir</th></tr></thead><tbody id="tabelaProdutos"></tbody></table>
 </div>
-
-<div id="abaVendas" style="display:none;" class="mt-3">
-    <h3>Registrar Venda</h3>
-    <div class="row g-2 mb-3"><div class="col-md-3"><input type="text" id="clienteVenda" class="form-control" placeholder="Nome do Cliente"></div><div class="col-md-3"><select id="produtoVenda" class="form-control"></select></div><div class="col-md-2"><input type="number" id="qtdVenda" class="form-control" placeholder="Qtd"></div><div class="col-md-2"><select id="metodoPagamento" class="form-control"><option value="Dinheiro">Dinheiro</option><option value="M-Pesa">M-Pesa</option><option value="Emola">Emola</option><option value="Conta Bancaria">Conta Bancaria</option><option value="Cartao">Cartao</option><option value="Credito">Credito</option></select></div><div class="col-md-2"><button class="btn btn-primary w-100" onclick="registrarVenda()">Vender</button></div></div>
-    <h5>Total Vendido: <span id="totalVendas">0.00 MT</span></h5>
-    <table class="table table-striped table-bordered"><thead class="table-dark"><tr><th>Data</th><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Total</th><th>Pagamento</th></tr></thead><tbody id="tabelaVendas"></tbody></table>
-</div>
-
-<div id="abaCompras" style="display:none;" class="mt-3"><h3>Compras / Abastecer</h3><div class="row g-2 mb-3"><div class="col-md-3"><select id="produtoCompra" class="form-control"></select></div><div class="col-md-2"><input id="qtdCompra" type="number" class="form-control" placeholder="Qtd"></div><div class="col-md-2"><input id="custoCompra" type="number" class="form-control" placeholder="Custo Total"></div><div class="col-md-3"><input id="fornecedorCompra" class="form-control" placeholder="Fornecedor"></div><div class="col-md-2"><button class="btn btn-warning w-100" onclick="registrarCompra()">Comprar</button></div></div><table class="table mt-3"><thead><tr><th>Data</th><th>Produto</th><th>Qtd</th><th>Custo</th><th>Fornecedor</th></tr></thead><tbody id="listaCompras"></tbody></table></div>
-
-<div id="abaRelatorios" style="display:none;" class="mt-3"><h3>Relatorio Financeiro</h3><div class="row text-center"><div class="col-md-3"><div class="card bg-success text-white"><div class="card-body"><h5>Vendas</h5><h3 id="relVendas">0.00 MT</h3></div></div></div><div class="col-md-3"><div class="card bg-warning text-dark"><div class="card-body"><h5>Compras</h5><h3 id="relCompras">0.00 MT</h3></div></div></div><div class="col-md-3"><div class="card bg-danger text-white"><div class="card-body"><h5>Folha RH</h5><h3 id="relFolha">0.00 MT</h3></div></div></div><div class="col-md-3"><div class="card bg-primary text-white"><div class="card-body"><h5>Lucro</h5><h3 id="relLucro">0.00 MT</h3></div></div></div></div><div style="width: 400px; margin: 20px auto;"><canvas id="graficoRelatorio"></canvas></div></div>
-
+<div id="abaVendas" style="display:none;" class="mt-3"><h3>Registrar Venda</h3><div class="row g-2 mb-3"><div class="col-md-3"><input type="text" id="clienteVenda" class="form-control" placeholder="Cliente"></div><div class="col-md-3"><select id="produtoVenda" class="form-control"></select></div><div class="col-md-2"><input type="number" id="qtdVenda" class="form-control" placeholder="Qtd"></div><div class="col-md-2"><select id="metodoPagamento" class="form-control"><option>Dinheiro</option><option>M-Pesa</option><option>Emola</option></select></div><div class="col-md-2"><button class="btn btn-primary w-100" onclick="registrarVenda()">Vender</button></div></div><table class="table"><thead class="table-dark"><tr><th>Data</th><th>Cliente</th><th>Produto</th><th>Qtd</th><th>Total</th><th>Pagamento</th></tr></thead><tbody id="tabelaVendas"></tbody></table></div>
+<div id="abaCompras" style="display:none;" class="mt-3"><h3>Compras</h3><div class="row g-2 mb-3"><div class="col-md-3"><select id="produtoCompra" class="form-control"></select></div><div class="col-md-2"><input id="qtdCompra" type="number" class="form-control" placeholder="Qtd"></div><div class="col-md-2"><input id="custoCompra" type="number" class="form-control" placeholder="Custo"></div><div class="col-md-3"><input id="fornecedorCompra" class="form-control" placeholder="Fornecedor"></div><div class="col-md-2"><button class="btn btn-warning w-100" onclick="registrarCompra()">Comprar</button></div></div><table class="table"><thead><tr><th>Data</th><th>Produto</th><th>Qtd</th><th>Custo</th><th>Fornecedor</th></tr></thead><tbody id="listaCompras"></tbody></table></div>
+<div id="abaRelatorios" style="display:none;" class="mt-3"><h3>Relatorio Financeiro</h3><div class="row text-center"><div class="col-md-3"><div class="card bg-success text-white"><div class="card-body"><h5>Vendas</h5><h3 id="relVendas">0.00 MT</h3></div></div></div><div class="col-md-3"><div class="card bg-warning"><div class="card-body"><h5>Compras</h5><h3 id="relCompras">0.00 MT</h3></div></div></div><div class="col-md-3"><div class="card bg-danger text-white"><div class="card-body"><h5>Folha RH</h5><h3 id="relFolha">0.00 MT</h3></div></div></div><div class="col-md-3"><div class="card bg-primary text-white"><div class="card-body"><h5>Lucro</h5><h3 id="relLucro">0.00 MT</h3></div></div></div></div><canvas id="graficoRelatorio"></canvas></div>
         </div>
     </div>
 </div>
 </div>
-
-<!-- TELA FUNCIONARIO - SÓ VE A SUA SITUAÇÃO -->
 <div id="sistemaFunc" style="display:none;" class="container mt-4">
     <div class="card shadow p-4" style="max-width:600px;margin:auto;">
-        <div class="d-flex justify-content-between align-items-center mb-3"><h4>Minha Situação</h4><button onclick="logout()" class="btn btn-danger btn-sm">Sair</button></div>
+        <div class="d-flex justify-content-between"><h4>Minha Situação</h4><button onclick="logout()" class="btn btn-danger btn-sm">Sair</button></div>
         <div id="dadosFunc"></div>
     </div>
 </div>
-
-<!-- TELA CLIENTE - SÓ PRODUTO E PREÇO + PAGAMENTOS -->
 <div id="sistemaCliente" style="display:none;">
-    <div class="bg-primary text-white p-3 d-flex justify-content-between align-items-center">
-        <b>Catálogo - GESTÃOMAX</b><button onclick="logout()" class="btn btn-light btn-sm">Voltar</button>
-    </div>
+    <div class="bg-primary text-white p-3 d-flex justify-content-between"><b>Catálogo - GESTÃOMAX</b><button onclick="logout()" class="btn btn-light btn-sm">Voltar</button></div>
     <div class="container mt-3">
         <div id="gridProdutos" class="grid"></div>
-        <div class="pagamentos">
-            <h5>💳 Formas de Pagamento da Loja</h5>
-            <div class="d-flex justify-content-between py-2 border-bottom"><span>📱 M-Pesa</span><b id="showMpesa">84 123 4567</b></div>
-            <div class="d-flex justify-content-between py-2 border-bottom"><span>📱 Emola</span><b id="showEmola">82 123 4567</b></div>
-            <div class="d-flex justify-content-between py-2 border-bottom"><span>💵 Dinheiro</span><b>Na loja</b></div>
-            <div class="d-flex justify-content-between py-2"><span>🏦 Conta Bancária</span><b id="showBanco">BCI - 123456789</b></div>
-            <small class="text-muted">Cliente só pode ver produto e preço. Envie comprovativo no WhatsApp.</small>
-        </div>
+        <div class="pagamentos"><h5>💳 Formas de Pagamento</h5><div class="d-flex justify-content-between"><span>M-Pesa</span><b id="showMpesa">84 123 4567</b></div><div class="d-flex justify-content-between"><span>Emola</span><b id="showEmola">82 123 4567</b></div><div class="d-flex justify-content-between"><span>Conta Bancária</span><b id="showBanco">BCI - 123456789</b></div></div>
     </div>
     <a id="whatsFloat" class="whats-float" href="#" target="_blank">💬</a>
 </div>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="script.js"></script>
-
 <script>
-// === LOGICA NOVA DE ROLES + WHATSAPP, NÃO ALTERA TEU SCRIPT.JS ===
 let roleAtual='admin';
 let cfg = JSON.parse(localStorage.getItem('gm_cfg')||'{"mpesa":"84 000 0000","emola":"82 000 0000","banco":"BCI - 000000"}');
-document.getElementById('cfgMpesa').value=cfg.mpesa;
-document.getElementById('cfgEmola').value=cfg.emola;
-document.getElementById('cfgBanco').value=cfg.banco;
+function setRole(r){roleAtual=r;document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('ativo'));document.getElementById('r'+r.charAt(0).toUpperCase()+r.slice(1)).classList.add('ativo');document.getElementById('loginDono').style.display=r==='admin'?'block':'none';document.getElementById('loginFunc').style.display=r==='func'?'block':'none';document.getElementById('loginCliente').style.display=r==='cliente'?'block':'none';}
+function fazerLogin(){if(document.getElementById('usuario').value==='admin' && document.getElementById('senha').value==='1234'){document.getElementById('telaLogin').style.display='none';document.getElementById('sistema').style.display='block';if(typeof listarFuncionarios==='function') listarFuncionarios();}else{document.getElementById('erroLogin').style.display='block';}}
+function logout(){document.getElementById('sistema').style.display='none';document.getElementById('sistemaFunc').style.display='none';document.getElementById('sistemaCliente').style.display='none';document.getElementById('telaLogin').style.display='block';}
+function salvarCfg(){let c={mpesa:document.getElementById('cfgMpesa').value,emola:document.getElementById('cfgEmola').value,banco:document.getElementById('cfgBanco').value};localStorage.setItem('gm_cfg',JSON.stringify(c));localStorage.setItem('gm_config_pag',JSON.stringify(c));alert('Salvo!');location.reload();}
+function renderPag(){if(!document.getElementById('showMpesa')) return; document.getElementById('showMpesa').innerText=cfg.mpesa;document.getElementById('showEmola').innerText=cfg.emola;document.getElementById('showBanco').innerText=cfg.banco;}
+function entrarFunc(){let cod=document.getElementById('codFunc').value.trim().toLowerCase();let funcs=JSON.parse(localStorage.getItem('funcionariosRH')||'[]');let f=funcs.find(x=>x.nome&&x.nome.toLowerCase().includes(cod))||funcs[0];if(!f){alert('Não encontrado');return;}document.getElementById('telaLogin').style.display='none';document.getElementById('sistemaFunc').style.display='block';document.getElementById('dadosFunc').innerHTML=`<p><b>Nome:</b> ${f.nome}</p><p><b>Dep:</b> ${f.departamento||''}</p><p><b>Bruto:</b> ${f.salario||0} MT</p>`;}
+function entrarCliente(){document.getElementById('telaLogin').style.display='none';document.getElementById('sistemaCliente').style.display='block';}
+function encomendar(nome, preco){let msg=`Olá! Quero ${nome} por ${preco} MT`;let num=cfg.mpesa.replace(/\s/g,'');window.open(`https://wa.me/258${num.replace(/^0/,'')}?text=${encodeURIComponent(msg)}`,'_blank');}
+function mostrarInteligencia(){let area=document.getElementById('areaInteligencia');area.innerHTML=`<div style="margin-top:12px"><div style="border-left:4px solid #ff4444;background:#fff1f1;padding:10px;margin:8px 0">SEX/SÁB - PICO 150% - precisa +1 pessoa</div><div style="border-left:4px solid #22c55e;background:#f0fdf4;padding:10px;margin:8px 0">TER/QUA - CALMO 60% - Ideal folgas</div><div style="border-left:4px solid #f59e0b;background:#fffbeb;padding:10px;margin:8px 0">Fadiga: João - 18h extras</div></div>`;}
 renderPag();
-
-function setRole(r){
- roleAtual=r;
- document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('ativo'));
- document.getElementById('r'+r.charAt(0).toUpperCase()+r.slice(1)).classList.add('ativo');
- document.getElementById('loginDono').style.display = r==='admin'?'block':'none';
- document.getElementById('loginFunc').style.display = r==='func'?'block':'none';
- document.getElementById('loginCliente').style.display = r==='cliente'?'block':'none';
-}
-
-function fazerLogin(){
- // Login original mantido
- if(document.getElementById('usuario').value==='admin' && document.getElementById('senha').value==='1234'){
-   document.getElementById('telaLogin').style.display='none';
-   document.getElementById('sistema').style.display='block';
-   if(typeof listarFuncionarios==='function') listarFuncionarios();
- }else{
-   document.getElementById('erroLogin').style.display='block';
- }
-}
-
-function logout(){
- document.getElementById('sistema').style.display='none';
- document.getElementById('sistemaFunc').style.display='none';
- document.getElementById('sistemaCliente').style.display='none';
- document.getElementById('telaLogin').style.display='block';
-}
-
-function salvarCfg(){
- let cfg = {
-   mpesa: document.getElementById('cfgMpesa').value,
-   emola: document.getElementById('cfgEmola').value,
-   dinheiro: document.getElementById('cfgDinheiro').value,
-   banco: document.getElementById('cfgBanco').value
- };
- localStorage.setItem('gm_config_pag', JSON.stringify(cfg));
- alert('Numeros salvos! M-Pesa: '+cfg.mpesa);
-}
-
-function renderPag(){
- document.getElementById('showMpesa').innerText=cfg.mpesa;
- document.getElementById('showEmola').innerText=cfg.emola;
- document.getElementById('showBanco').innerText=cfg.banco;
- let num = cfg.mpesa.replace(/\s/g,'');
- document.getElementById('whatsFloat').href='https://wa.me/258'+num.replace(/^0/,'')+'?text=Olá! Vim do catálogo';
-}
-
-function entrarFunc(){
- let cod = document.getElementById('codFunc').value.trim().toLowerCase();
- let funcionarios = JSON.parse(localStorage.getItem('funcionarios')||'[]');
- let f = funcionarios.find(x=> x.nome && x.nome.toLowerCase().includes(cod)) || funcionarios[0];
- if(!f){ alert('Funcionário não encontrado. Cadastre primeiro como dono.'); return; }
- document.getElementById('telaLogin').style.display='none';
- document.getElementById('sistemaFunc').style.display='block';
- document.getElementById('dadosFunc').innerHTML = `<p><b>Nome:</b> ${f.nome}</p><p><b>Departamento:</b> ${f.departamento||''}</p><p><b>Salário Bruto:</b> ${f.salario||0} MT</p><p><b>Salário Líquido:</b> ${f.salarioLiquido||f.salario} MT</p><p><b>Faltas:</b> ${f.faltas||0}</p><hr><p class='text-success'>✔ Você só vê sua situação, não vê dados de outros colegas nem stock.</p>`;
-}
-
-function encomendar(nome, preco){
- let msg = `Olá! Quero encomendar: ${nome} por ${preco} MT. Forma de pagamento?`;
- let num = cfg.mpesa.replace(/\s/g,'');
- window.open(`https://wa.me/258${num.replace(/^0/,'')}?text=${encodeURIComponent(msg)}`,'_blank');
-}
-</script>
-    
-function mostrarInteligencia(){
- let cfg=JSON.parse(localStorage.getItem('gm_config_pag')||'{"mpesa":"852573746"}');
- let produtos=JSON.parse(localStorage.getItem('produtosRH')||'[]');
- let area=document.getElementById('areaInteligencia');
- area.innerHTML=`<div style="margin-top:12px">
-  <div style="border-left:4px solid #ff4444;background:#fff1f1;padding:10px;margin:8px 0;border-radius:6px"><b>📈 SEX/SÁB - PICO 150%</b> - Fim de mês precisa +1 pessoa</div>
-  <div style="border-left:4px solid #22c55e;background:#f0fdf4;padding:10px;margin:8px 0;border-radius:6px"><b>📉 TER/QUA - CALMO 60%</b> - Ideal folgas</div>
-  <div style="border-left:4px solid #f59e0b;background:#fffbeb;padding:10px;margin:8px 0;border-radius:6px"><b>⚠️ Fadiga: João - 18h extras + 5 erros</b><br><small style="color:red">Pode estar sobrecarregado, erro subiu 15%. Sugerir folga.</small></div>
- </div>`;
-}
 </script>
 </body>
 </html>
