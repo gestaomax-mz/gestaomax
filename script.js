@@ -1,7 +1,6 @@
-// GESTAOMAX COMERCIAL V2 - FINAL COM PAGAMENTOS
+// GESTAOMAX COMERCIAL V2 - FINAL COM PAGAMENTOS - LIMPO
 const GMAX_KEY = 'gestaomax_licenca_v1';
 const GMAX_EMPRESA = 'gestaomax_empresa_atual';
-
 const MEUS_PAGAMENTOS = {
   mpesa: "852573746 - Stephan Jeque",
   emola: "868070614 - Elidio Jeque",
@@ -9,9 +8,7 @@ const MEUS_PAGAMENTOS = {
   chamadas: "868070614 / 879246937",
   whatsapp: "852573746 / 873370614"
 };
-
 const MEUS_PRECOS = "START 1.200MT | PRO 1.500MT | BUSINESS 2.500MT";
-
 function validarChave(chave){
   if(!chave ||!chave.startsWith('GMAX-')) return null;
   let partes = chave.split('-');
@@ -27,7 +24,6 @@ function validarChave(chave){
   let nomeEmpresa = partes[1].replace(/_/g,' ');
   return {valida:true, empresa:nomeEmpresa, expira};
 }
-
 function verificarLicenca(){
   let chave = localStorage.getItem(GMAX_KEY);
   if(!chave) return {ok:false};
@@ -36,7 +32,6 @@ function verificarLicenca(){
   if(v.expirada) return {ok:false, expirada:true, data:v.data};
   return {ok:true, empresa:v.empresa, expira:v.expira, chave};
 }
-
 function telaLicenca(motivo=''){
   document.body.innerHTML = `<div style="min-height:100vh;background:#0d47a1;display:flex;align-items:center;justify-content:center;padding:15px;font-family:Arial;">
   <div style="background:white;border-radius:20px;max-width:420px;width:100%;padding:25px;text-align:center">
@@ -55,7 +50,6 @@ function telaLicenca(motivo=''){
     <p style="font-size:11px;margin-top:15px">Chamadas: ${MEUS_PAGAMENTOS.chamadas}<br>WhatsApp: ${MEUS_PAGAMENTOS.whatsapp}</p>
   </div></div>`;
 }
-
 window.ativarLicenca = function(){
   let c = document.getElementById('inputChave').value.trim().toUpperCase();
   let v = validarChave(c);
@@ -65,7 +59,6 @@ window.ativarLicenca = function(){
   localStorage.setItem(GMAX_EMPRESA, v.empresa);
   location.reload();
 }
-
 function getEmpresaAtual(){ return localStorage.getItem(GMAX_EMPRESA) || 'GERAL'; }
 function getKeyFuncionarios(){ return 'funcionariosRH_'+getEmpresaAtual().replace(/\s+/g,'_'); }
 function getFuncionariosEmpresa(){
@@ -79,7 +72,6 @@ function setFuncionariosEmpresa(arr){
   window.funcionarios = unicos;
   return unicos;
 }
-
 (function(){
   let lic = verificarLicenca();
   if(!lic.ok){
@@ -88,30 +80,7 @@ function setFuncionariosEmpresa(arr){
     return;
   }
   window.funcionarios = getFuncionariosEmpresa();
-  setTimeout(()=>{
-    let h1=document.querySelector('h1');
-    if(h1) h1.innerHTML += `<div style="font-size:12px;background:#e3f2fd;color:#0d47a1;padding:4px 8px;border-radius:20px;margin-top:5px;display:inline-block">Licenciado: ${lic.empresa} | até ${lic.expira.toLocaleDateString()}</div>`;
-  },500);
 })();
-
-window.verMinhaSituacao = function(e){
-  if(e) e.preventDefault();
-  let funcs = getFuncionariosEmpresa();
-  let input = document.querySelector('input[placeholder*="Código"]') || document.querySelectorAll('input')[0];
-  let termo = (input?.value||'').trim().toLowerCase();
-  if(!termo) termo = (prompt('Digite seu NOME:')||'').toLowerCase();
-  if(!termo) return;
-  let f = funcs.find(x=> (x.nome||'').toLowerCase().includes(termo) || String(x.id)===termo || (x.codigo||'').toLowerCase()===termo);
-  if(!f){ alert('Não achei. Lista: '+funcs.map(x=>x.nome).join(', ')); return; }
-  document.body.innerHTML = `<div style="background:#f0f2f5;display:flex;align-items:center;justify-content:center;min-height:100vh;padding:15px;font-family:Arial;"><div style="background:white;border-radius:20px;max-width:420px;width:100%;overflow:hidden;box-shadow:0 15px 40px rgba(0,0,0,.2);"><div style="background:#1565C0;color:white;padding:25px;text-align:center;"><h2>${f.nome}</h2><p>${getEmpresaAtual()}</p></div><div style="padding:22px;"><p>Base: ${f.salarioBruto} MT</p><div style="background:#1565C0;color:white;padding:18px;border-radius:12px;font-size:18px;"><b>Líquido: ${Number(f.salarioLiquido).toFixed(2)} MT</b></div><button onclick="location.reload()" style="width:100%;margin-top:15px;padding:14px;background:#111;color:white;border:none;border-radius:12px">Sair</button></div></div></div>`;
-}
-setTimeout(()=>{
-  document.querySelectorAll('button').forEach(b=>{
-    if(b.textContent.toLowerCase().includes('ver minha')) b.onclick = window.verMinhaSituacao;
-  });
-},800);
-
-// FUNÇÕES QUE FALTAVAM - FIX DO BUG
 function baixarBackup(){
   let dados = {
     funcionarios: localStorage.getItem(getKeyFuncionarios()),
@@ -122,8 +91,8 @@ function baixarBackup(){
   let url = URL.createObjectURL(blob);
   let a = document.createElement('a');
   a.href = url; a.download = `backup_${getEmpresaAtual()}_${new Date().toISOString().slice(0,10)}.json`; a.click();
+  URL.revokeObjectURL(url);
 }
-
 function carregarBackup(event){
   const file = event.target.files[0];
   if(!file) return;
@@ -135,24 +104,11 @@ function carregarBackup(event){
         localStorage.setItem(getKeyFuncionarios(), dados.funcionarios);
         localStorage.setItem('funcionariosRH', dados.funcionarios);
       }
-      alert("Backup carregado!");
+      alert("Backup carregado com sucesso!");
       location.reload();
     }catch(err){
-      alert("Arquivo inválido!");
+      alert("Arquivo inválido: " + err.message);
     }
   };
   reader.readAsText(file);
-}
-
-// FIX do salvarCfg que tava dando erro de cfgDinheiro
-window.salvarCfg = function(){
-  let cfg = {
-    mpesa: document.getElementById('cfgMpesa').value,
-    emola: document.getElementById('cfgEmola').value,
-    banco: document.getElementById('cfgBanco').value
-  };
-  localStorage.setItem('gm_cfg', JSON.stringify(cfg));
-  localStorage.setItem('gm_config_pag', JSON.stringify(cfg));
-  alert('Números salvos!');
-  location.reload();
 }
