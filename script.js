@@ -198,16 +198,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   let tc = document.getElementById('TC'); if(tc) tc.addEventListener('input', listarFuncionarios);
   let dir = document.getElementById('Direcao'); if(dir) dir.addEventListener('change', listarFuncionarios);
 });
-function exportarFuncionarios(){ alert('Exportar - precisa XLSX'); }
-function exportarFolha(){ exportarFuncionarios(); }
-function imprimirFolha(){ window.print(); }
-function mostrarCompras(){}
-function mostrarInteligencia(){}
-function adicionarProduto(){}
-function registrarVenda(){}
-function registrarCompra(){}
-function gerarRecibo(){}
-function gerarTodosRecibos(){}
 
 // --- PATCH FUNCIONARIO E CLIENTE - OBRIGATORIO ---
 function entrarFunc(){
@@ -280,4 +270,125 @@ function fazerLogin(){
     let err = document.getElementById('erroLogin');
     if(err) err.style.display='block';
   }
+}
+
+// ===== FUNCOES DE VOLTA - GESTAOMAX COMPLETO =====
+
+function exportarFuncionarios(){
+  let lista = getFuncionariosEmpresa();
+  if(lista.length===0){ alert('Nenhum funcionario para exportar'); return; }
+  let csv = "Nome,Tipo,Departamento,Salario,Bonus,Faltas,Bruto,Liquido\n";
+  lista.forEach(f=>{
+    let bruto = (parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0);
+    let liq = bruto - ((parseFloat(f.faltas)||0)*((parseFloat(f.salario)||0)/30));
+    if(liq<0) liq=0;
+    csv += `"${f.nome}","${f.tipo}","${f.departamento}",${f.salario},${f.bonus},${f.faltas},${bruto.toFixed(2)},${liq.toFixed(2)}\n`;
+  });
+  let blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  let url = URL.createObjectURL(blob);
+  let a = document.createElement('a'); a.href=url; a.download=`funcionarios_${getEmpresaAtual()}_${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function exportarFolha(){ exportarFuncionarios(); }
+
+function imprimirFolha(){
+  let lista = getFuncionariosEmpresa();
+  let w = window.open('','','width=800,height=600');
+  let html = `<html><head><title>Folha ${getEmpresaAtual()}</title>
+  <style>body{font-family:Arial} table{width:100%;border-collapse:collapse} th,td{border:1px solid #ccc;padding:8px} th{background:#0d6efd;color:white}</style>
+  </head><body><h2>Folha Salarial - ${getEmpresaAtual()} - ${new Date().toLocaleDateString()}</h2><table><tr><th>Nome</th><th>Depto</th><th>Base</th><th>Bonus</th><th>Faltas</th><th>Liquido</th></tr>`;
+  lista.forEach(f=>{
+    let bruto = (parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0);
+    let liq = bruto - ((parseFloat(f.faltas)||0)*((parseFloat(f.salario)||0)/30));
+    if(liq<0) liq=0;
+    html+=`<tr><td>${f.nome}</td><td>${f.departamento}</td><td>${f.salario}</td><td>${f.bonus}</td><td>${f.faltas}</td><td><b>${liq.toFixed(2)} MT</b></td></tr>`;
+  });
+  html+=`</table><script>window.print();window.close()<\/script></body></html>`;
+  w.document.write(html); w.document.close();
+}
+
+function mostrarCompras(){
+  mostrarAba('abaCompras');
+  let lista = JSON.parse(localStorage.getItem('compras_'+getEmpresaAtual())||'[]');
+  let div = document.getElementById('listaCompras');
+  if(div) div.innerHTML = lista.length? lista.map(c=>`<div class="p-2 border-bottom">${c.data} - ${c.produto} - ${c.qtd} x ${c.preco} MT</div>`).join('') : '<p class="text-muted">Sem compras</p>';
+}
+
+function mostrarInteligencia(){
+  mostrarAba('abaInteligencia');
+  let lista = getFuncionariosEmpresa();
+  let total = lista.reduce((s,f)=> s + ((parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0)), 0);
+  let div = document.getElementById('inteligenciaDados');
+  if(div) div.innerHTML = `<p><b>Total Funcionarios:</b> ${lista.length}</p><p><b>Folha Bruta Total:</b> ${total.toFixed(2)} MT</p><p><b>Empresa:</b> ${getEmpresaAtual()}</p><p class="text-success">Sistema Operacional</p>`;
+}
+
+// PRODUTOS / VENDAS / COMPRAS
+function getProdutos(){ return JSON.parse(localStorage.getItem('produtos_'+getEmpresaAtual())||'[]'); }
+function setProdutos(arr){ localStorage.setItem('produtos_'+getEmpresaAtual(), JSON.stringify(arr)); }
+
+function adicionarProduto(){
+  let nome = prompt('Nome do produto:'); if(!nome) return;
+  let preco = parseFloat(prompt('Preco venda MT:')||'0');
+  let estoque = parseInt(prompt('Estoque inicial:')||'0');
+  let lista = getProdutos();
+  lista.push({id:Date.now(), nome:nome, preco:preco, estoque:estoque});
+  setProdutos(lista);
+  alert('Produto '+nome+' adicionado!');
+  if(typeof carregarCatalogo==='function') carregarCatalogo();
+}
+
+function registrarVenda(){
+  let nome = prompt('Produto vendido:'); if(!nome) return;
+  let qtd = parseInt(prompt('Quantidade:')||'1');
+  let lista = getProdutos();
+  let p = lista.find(x=> x.nome.toLowerCase().includes(nome.toLowerCase()));
+  if(!p){ alert('Produto nao encontrado'); return; }
+  if(p.estoque < qtd){ alert('Estoque insuficiente: '+p.estoque); return; }
+  p.estoque -= qtd; setProdutos(lista);
+  let vendas = JSON.parse(localStorage.getItem('vendas_'+getEmpresaAtual())||'[]');
+  vendas.push({id:Date.now(), produto:p.nome, qtd:qtd, preco:p.preco, total:qtd*p.preco, data:new Date().toLocaleString()});
+  localStorage.setItem('vendas_'+getEmpresaAtual(), JSON.stringify(vendas));
+  alert(`Venda: ${qtd}x ${p.nome} = ${(qtd*p.preco).toFixed(2)} MT`);
+}
+
+function registrarCompra(){
+  let nome = prompt('Produto comprado:'); if(!nome) return;
+  let qtd = parseInt(prompt('Quantidade:')||'1');
+  let preco = parseFloat(prompt('Preco compra MT:')||'0');
+  let lista = getProdutos();
+  let p = lista.find(x=> x.nome.toLowerCase().includes(nome.toLowerCase()));
+  if(p){ p.estoque += qtd; } else { lista.push({id:Date.now(), nome:nome, preco:preco*1.3, estoque:qtd}); }
+  setProdutos(lista);
+  let compras = JSON.parse(localStorage.getItem('compras_'+getEmpresaAtual())||'[]');
+  compras.push({id:Date.now(), produto:nome, qtd:qtd, preco:preco, total:qtd*preco, data:new Date().toLocaleString()});
+  localStorage.setItem('compras_'+getEmpresaAtual(), JSON.stringify(compras));
+  alert('Compra registrada!');
+}
+
+function gerarRecibo(){
+  let nome = prompt('Recibo para funcionario (nome):'); if(!nome) return;
+  let f = getFuncionariosEmpresa().find(x=> x.nome.toLowerCase().includes(nome.toLowerCase()));
+  if(!f){ alert('Funcionario nao encontrado'); return; }
+  let bruto = (parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0);
+  let desconto = (parseFloat(f.faltas)||0)*((parseFloat(f.salario)||0)/30);
+  let liquido = bruto - desconto; if(liquido<0) liquido=0;
+  let w = window.open('','','width=600,height=700');
+  w.document.write(`<html><head><style>body{font-family:Arial;padding:20px}.recibo{border:2px solid #000;padding:20px}</style></head><body><div class="recibo"><h2>RECIBO SALARIAL - ${getEmpresaAtual()}</h2><p><b>Funcionario:</b> ${f.nome}</p><p><b>Departamento:</b> ${f.departamento}</p><p><b>Salario Base:</b> ${f.salario} MT</p><p><b>Bonus:</b> ${f.bonus} MT</p><p><b>Faltas:</b> ${f.faltas}</p><p><b>Bruto:</b> ${bruto.toFixed(2)} MT</p><p><b>Desconto Faltas:</b> ${desconto.toFixed(2)} MT</p><h3>Liquido: ${liquido.toFixed(2)} MT</h3><p>Data: ${new Date().toLocaleDateString()}</p><br><br><p>Assinatura: ___________________________</p></div><script>window.print()<\/script></body></html>`);
+  w.document.close();
+}
+
+function gerarTodosRecibos(){
+  let lista = getFuncionariosEmpresa();
+  if(lista.length===0){ alert('Sem funcionarios'); return; }
+  let w = window.open('','','width=800,height=900');
+  let html = `<html><head><style>body{font-family:Arial}.recibo{border:1px solid #000;padding:15px;margin-bottom:20px;page-break-after:always}</style></head><body><h1>Recibos - ${getEmpresaAtual()} - ${new Date().toLocaleDateString()}</h1>`;
+  lista.forEach(f=>{
+    let bruto = (parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0);
+    let desconto = (parseFloat(f.faltas)||0)*((parseFloat(f.salario)||0)/30);
+    let liq = bruto - desconto; if(liq<0) liq=0;
+    html+=`<div class="recibo"><h3>${f.nome} - ${f.departamento}</h3><p>Base: ${f.salario} MT | Bonus: ${f.bonus} MT | Faltas: ${f.faltas}</p><p><b>Liquido: ${liq.toFixed(2)} MT</b></p><p>Ass: ___________________</p></div>`;
+  });
+  html+=`<script>window.print()<\/script></body></html>`;
+  w.document.write(html); w.document.close();
 }
