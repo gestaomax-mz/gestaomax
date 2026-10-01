@@ -298,3 +298,76 @@ function entrarCliente(){ let tLogin = document.getElementById('telaLogin'); if(
 function logout(){ let t1 = document.getElementById('sistema'); if(t1) t1.style.display='none'; let t2 = document.getElementById('sistemaFunc'); if(t2) t2.style.display='none'; let t3 = document.getElementById('sistemaCliente'); if(t3) t3.style.display='none'; let tLogin = document.getElementById('telaLogin'); if(tLogin) tLogin.style.display='block'; let lic = verificarLicenca(); if(!lic.ok) telaLicenca(); }
 function setRole(r){ document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('ativo')); let btn = document.getElementById('r'+r.charAt(0).toUpperCase()+r.slice(1)); if(btn) btn.classList.add('ativo'); let dDono = document.getElementById('loginDono'); if(dDono) dDono.style.display = r==='admin'?'block':'none'; let dFunc = document.getElementById('loginFunc'); if(dFunc) dFunc.style.display = r==='func'?'block':'none'; let dCli = document.getElementById('loginCliente'); if(dCli) dCli.style.display = r==='cliente'?'block':'none'; }
 function fazerLogin(){ let u = document.getElementById('usuario').value; let s = document.getElementById('senha').value; if(u==='admin' && s==='1234'){ let tLogin = document.getElementById('telaLogin'); if(tLogin) tLogin.style.display='none'; let tSis = document.getElementById('sistema'); if(tSis) tSis.style.display='block'; let empNome = document.getElementById('empresaNome'); if(empNome) empNome.innerText = getEmpresaAtual(); listarFuncionarios(); listarProdutos(); }else{ let err = document.getElementById('erroLogin'); if(err) err.style.display='block'; } }
+
+// ===== v12 - STOCK BAIXO + CALCULADORA KILOS =====
+function verificarStockBaixo(){
+  return getProdutos().filter(p => (p.estoque||0) <= (p.minStock||5) );
+}
+function mostrarAlertasStock(){
+  let div=document.getElementById('alertasStock'); if(!div) return;
+  let baixos=verificarStockBaixo();
+  if(baixos.length===0){ div.innerHTML=`<div class="alert alert-success">✅ Stock OK</div>`; return; }
+  let html=`<div class="alert alert-danger"><b>⚠️ ${baixos.length} produto(s) prestes a acabar!</b></div><table class="table table-sm table-danger"><tr><th>Produto</th><th>Atual</th><th>Mín</th><th>Repor</th><th></th></tr>`;
+  baixos.forEach(p=>{
+    let ideal=p.estoqueIdeal|| (p.unidade==='kg'?50:20);
+    let repor=Math.max(0, ideal - (p.estoque||0));
+    html+=`<tr><td><b>${p.nome}</b> (${p.unidade||'un'})</td><td>${p.estoque}</td><td>${p.minStock||5}</td><td style="color:green"><b>+${repor.toFixed(p.unidade==='kg'?3:0)} ${p.unidade||'un'}</b></td><td><button onclick="registrarCompraRapida('${p.nome}')" class="btn btn-sm btn-warning">Repor</button></td></tr>`;
+  });
+  html+=`</table>`; div.innerHTML=html;
+}
+function registrarCompraRapida(nome){
+  let qtd=parseFloat(prompt(`Quanto repor de ${nome}?`)||'0'); if(qtd<=0) return;
+  let lista=getProdutos(); let p=lista.find(x=>x.nome===nome);
+  if(p){ p.estoque+=qtd; setProdutos(lista); listarProdutos(); alert(`Reposto! Stock: ${p.estoque}`); }
+}
+function atualizarSelectCalculadora(){
+  let sel=document.getElementById('calcProdutoKilo'); if(!sel) return;
+  let pesados=getProdutos().filter(p=>p.unidade==='kg'||p.unidade==='litro');
+  sel.innerHTML='<option value="">Escolha produto KG/Litro</option>';
+  pesados.forEach(p=>{ let o=document.createElement('option'); o.value=p.nome; o.textContent=`${p.nome} - ${p.preco.toFixed(2)} MT/${p.unidade}`; sel.appendChild(o); });
+  if(pesados.length===0) sel.innerHTML='<option value="">Nenhum produto KG - Adicione com UN=KG</option>';
+}
+function calcularKilos(){
+  let sel=document.getElementById('calcProdutoKilo'); let val=document.getElementById('calcValorCliente'); let res=document.getElementById('calcResultadoKilo'); if(!sel||!val||!res) return;
+  let p=getProdutos().find(x=>x.nome===sel.value); if(!p){ res.innerHTML='<small>Escolha produto</small>'; return; }
+  let valor=parseFloat(val.value.replace(',','.'))||0;
+  if(valor<=0){ res.innerHTML=`<b>${p.nome}</b>: ${p.preco.toFixed(2)} MT/${p.unidade}<br><small>Digite valor que cliente quer pagar</small>`; return; }
+  let kilos=valor/(p.preco||1); let ok=(p.estoque||0)>=kilos;
+  res.innerHTML=`<div class="card p-2 ${ok?'bg-light':'bg-danger text-white'}"><b>${p.nome}</b><br>Cliente: ${valor.toFixed(2)} MT = <b style="font-size:1.3em">${kilos.toFixed(3)} ${p.unidade}</b><br>Stock: ${p.estoque} ${p.unidade} ${ok?'✅':'❌'}<br>${ok?`<button onclick="venderKilos('${p.nome}',${kilos},${valor})" class="btn btn-sm btn-success mt-1">Confirmar Venda</button>`:''}</div>`;
+}
+function venderKilos(nome,kilos,valor){
+  if(!confirm(`Vender ${kilos.toFixed(3)} de ${nome} por ${valor.toFixed(2)} MT?`)) return;
+  let lista=getProdutos(); let p=lista.find(x=>x.nome===nome); if(!p||p.estoque<kilos){ alert('Stock insuficiente'); return; }
+  p.estoque-=kilos; setProdutos(lista);
+  let vendas=JSON.parse(localStorage.getItem('vendas_'+getEmpresaAtual())||'[]');
+  vendas.push({id:Date.now(), produto:`${p.nome} (${kilos.toFixed(3)}${p.unidade})`, qtd:kilos, preco:p.preco, total:valor, data:new Date().toLocaleString()});
+  localStorage.setItem('vendas_'+getEmpresaAtual(), JSON.stringify(vendas));
+  listarProdutos(); listarVendas(); alert(`Venda: ${kilos.toFixed(3)} ${p.unidade} = ${valor.toFixed(2)} MT`);
+}
+
+// Melhora adicionarProduto para perguntar KG
+let adicionarProduto_old = adicionarProduto;
+window.adicionarProduto = function(){
+  let nome=prompt('Nome do produto:'); if(!nome) return;
+  let uni=prompt('Unidade: UN, KG, L (padrão UN):','UN')||'UN'; uni=uni.toLowerCase();
+  if(uni.startsWith('k')) uni='kg'; else if(uni.startsWith('l')) uni='litro'; else uni='un';
+  let preco=parseFloat(prompt(`Preço por ${uni} em MT:`)||'0');
+  let est=parseFloat(prompt(`Stock inicial em ${uni}:`)||'0');
+  let min=parseInt(prompt(`Avisar quando for menor que? (5)`)||'5');
+  let ideal=parseInt(prompt(`Stock ideal? (20)`)||'20');
+  let lista=getProdutos(); lista.push({id:Date.now(), nome, unidade:uni, preco, estoque:est, minStock:min, estoqueIdeal:ideal});
+  setProdutos(lista); listarProdutos();
+}
+function listarProdutos(){
+  let tbody=document.getElementById('tabelaProdutos'); let lista=getProdutos();
+  if(tbody){
+    tbody.innerHTML=''; lista.forEach(p=>{
+      let baixo=(p.estoque||0)<=(p.minStock||5);
+      let tr=document.createElement('tr'); if(baixo) tr.className='table-danger';
+      tr.innerHTML=`<td>${p.nome} (${p.unidade||'un'}) ${baixo?'<span class="badge bg-danger">BAIXO</span>':''}</td><td>${p.preco.toFixed(2)} MT/${p.unidade||'un'}</td><td>${p.estoque}</td><td>${(p.preco*p.estoque).toFixed(2)} MT</td><td>Min:${p.minStock||5}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+  if(typeof carregarGraficoEstoque==='function') carregarGraficoEstoque();
+  mostrarAlertasStock(); atualizarSelectCalculadora();
+}
