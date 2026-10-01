@@ -77,7 +77,7 @@
         </div></div>
     </div>
 </div>
-<script src="script.js?v=3"></script>
+<script src="script.js?v=4"></script>
 <script>
 let roleAtual='admin';
 function usarDemo(){localStorage.setItem('gestaomax_licenca_v1','DEMO');localStorage.setItem('GMX_LICENSE','DEMO');location.reload();}
@@ -96,5 +96,15 @@ function setRole(r){roleAtual=r;document.querySelectorAll('.role-btn').forEach(b
 function fazerLogin(){if(document.getElementById('usuario').value==='admin'&&document.getElementById('senha').value==='1234'){document.getElementById('telaLogin').style.display='none';document.getElementById('sistema').style.display='block';listarFuncionarios();}else{document.getElementById('erroLogin').style.display='block';}}
 function logout(){document.getElementById('sistema').style.display='none';document.getElementById('telaLogin').style.display='block';}
 </script>
+    <div id="sistemaFunc" style="display:none;" class="container mt-4">
+    <div class="card shadow p-4" style="max-width:600px;margin:auto;">
+        <div class="d-flex justify-content-between"><h4>Minha Situação</h4><button onclick="logout()" class="btn btn-danger btn-sm">Sair</button></div>
+        <div id="dadosFunc"></div>
+    </div>
+</div>
+<div id="sistemaCliente" style="display:none;">
+    <div class="bg-primary text-white p-3 d-flex justify-content-between"><b>Catálogo</b><button onclick="logout()" class="btn btn-light btn-sm">Voltar</button></div>
+    <div class="container mt-3"><div id="gridProdutos"></div></div>
+</div>
 </body>
 </html>
