@@ -371,3 +371,116 @@ function listarProdutos(){
   if(typeof carregarGraficoEstoque==='function') carregarGraficoEstoque();
   mostrarAlertasStock(); atualizarSelectCalculadora();
 }
+
+// ===== v14 - CATÁLOGO CLIENTE COM FOTOS + WHATSAPP =====
+function getEmpresaWhats(){ return localStorage.getItem('empresa_whats_'+getEmpresaAtual())||''; }
+function setEmpresaWhats(num){ localStorage.setItem('empresa_whats_'+getEmpresaAtual(), num); }
+
+function getClientesWhats(){ return JSON.parse(localStorage.getItem('clientes_whats_'+getEmpresaAtual())||'[]'); }
+function setClientesWhats(arr){ localStorage.setItem('clientes_whats_'+getEmpresaAtual(), JSON.stringify(arr)); }
+function addClienteWhats(nome, telefone, produto){
+  let lista=getClientesWhats();
+  lista.unshift({id:Date.now(), nome:nome||'Cliente', telefone, produto, data:new Date().toLocaleString()});
+  if(lista.length>50) lista=lista.slice(0,50);
+  setClientesWhats(lista); listarClientesWhats();
+}
+
+function getFotoProduto(nome){
+  let n=(nome||'').toLowerCase();
+  if(n.includes('arroz')) return 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400';
+  if(n.includes('feijao')||n.includes('feijão')) return 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400';
+  if(n.includes('acucar')||n.includes('açucar')) return 'https://images.unsplash.com/photo-1587049352851-8d4e89133924?w=400';
+  if(n.includes('oleo')||n.includes('óleo')) return 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400';
+  if(n.includes('farinha')) return 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400';
+  if(n.includes('milho')) return 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=400';
+  // generico
+  return `https://via.placeholder.com/400x300/0d6efd/ffffff?text=${encodeURIComponent(nome)}`;
+}
+
+window.carregarCatalogo=function(){
+  let grid=document.getElementById('gridCatalogo'); if(!grid) return;
+  let lista=getProdutos(); let busca=(document.getElementById('buscaCatalogo')?.value||'').toLowerCase();
+  if(busca) lista=lista.filter(p=>p.nome.toLowerCase().includes(busca));
+  let whats=getEmpresaWhats();
+  if(lista.length===0){
+    grid.innerHTML=`<div class="col-12 text-center p-5"><h4>📦 Nenhum produto cadastrado</h4><p>Vai em <b>Produtos / Estoque > + Produto</b> e adicione Arroz, Feijão etc</p><p>As fotos baixam online automaticamente</p></div>`;
+    return;
+  }
+  grid.innerHTML='';
+  lista.forEach(p=>{
+    let foto=p.foto||getFotoProduto(p.nome);
+    let card=document.createElement('div'); card.className='col-md-3 col-6';
+    card.innerHTML=`
+      <div class="card shadow-sm h-100">
+        <img src="${foto}" class="card-img-top" style="height:180px;object-fit:cover" onerror="this.src='https://via.placeholder.com/300?text=${p.nome}'">
+        <div class="card-body d-flex flex-column">
+          <h6 class="card-title">${p.nome} <small class="text-muted">(${p.unidade||'un'})</small></h6>
+          <p class="mb-1"><b style="color:#0d6efd">${p.preco.toFixed(2)} MT</b> / ${p.unidade||'un'}</p>
+          <p class="small ${p.estoque<= (p.minStock||5)?'text-danger':'text-success'}">Stock: ${p.estoque} ${p.unidade||'un'} ${p.estoque<=5?'⚠️ Baixo':''}</p>
+          <div class="mt-auto d-grid gap-1">
+            <button onclick="pedirWhats('${p.nome}', ${p.preco})" class="btn btn-success btn-sm">💬 Pedir no WhatsApp</button>
+          </div>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+window.pedirWhats=function(nomeProduto, preco){
+  let whats=getEmpresaWhats();
+  if(!whats || whats.length<9){ alert('Primeiro configura o número da empresa no topo! Ex: 258841234567'); document.getElementById('inputEmpresaWhats').focus(); return; }
+  let nomeCliente=prompt('Seu nome:')||'Cliente';
+  let telCliente=prompt('Seu WhatsApp (para a loja te responder):')||'';
+  let msg=`Olá ${getEmpresaAtual()}! Quero ${nomeProduto} por ${preco.toFixed(2)} MT. Sou ${nomeCliente}`;
+  addClienteWhats(nomeCliente, telCliente, nomeProduto);
+  let url=`https://wa.me/${whats.replace(/\D/g,'')}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+
+function listarClientesWhats(){
+  let div=document.getElementById('listaClientesWhats'); if(!div) return;
+  let lista=getClientesWhats();
+  if(lista.length===0){ div.innerHTML='<p class="text-muted">Nenhum cliente ainda - quando cliente clicar em Pedir no WhatsApp, aparece aqui</p>'; return; }
+  let html=`<table class="table table-sm"><tr><th>Data</th><th>Cliente</th><th>Telefone</th><th>Produto</th><th>Ação</th></tr>`;
+  lista.forEach(c=>{
+    let whats=getEmpresaWhats();
+    let url=`https://wa.me/${(c.telefone||'').replace(/\D/g,'')}?text=${encodeURIComponent('Olá '+c.nome+' sobre '+c.produto)}`;
+    html+=`<tr><td>${c.data}</td><td>${c.nome}</td><td>${c.telefone||'-'}</td><td>${c.produto}</td><td><a href="${url}" target="_blank" class="btn btn-sm btn-outline-success">Responder</a></td></tr>`;
+  });
+  html+=`</table>`; div.innerHTML=html;
+}
+
+window.entrarCliente=function(){
+  document.getElementById('telaLogin').style.display='none';
+  document.getElementById('sistema').style.display='none';
+  document.getElementById('sistemaCliente').style.display='block';
+  document.getElementById('catalogoEmpresaNome').innerText=getEmpresaAtual();
+  let inputWhats=document.getElementById('inputEmpresaWhats');
+  if(inputWhats){
+    inputWhats.value=getEmpresaWhats();
+    inputWhats.onchange=function(){ setEmpresaWhats(this.value); atualizarBtnWhats(); }
+    inputWhats.oninput=function(){ setEmpresaWhats(this.value); atualizarBtnWhats(); }
+  }
+  function atualizarBtnWhats(){
+    let btn=document.getElementById('btnWhatsEmpresa'); let num=getEmpresaWhats();
+    if(btn){ if(num){ btn.href=`https://wa.me/${num.replace(/\D/g,'')}?text=${encodeURIComponent('Olá '+getEmpresaAtual())}`; btn.style.display='inline-block'; } else { btn.style.display='none'; } }
+  }
+  atualizarBtnWhats(); carregarCatalogo(); listarClientesWhats();
+}
+
+// Melhora adicionarProduto v14 com foto online automática
+window.adicionarProduto=function(){
+  let nome=prompt('Nome do produto:'); if(!nome) return;
+  let uni=prompt('Unidade: UN, KG, L (padrão UN):','UN')||'UN'; uni=uni.toLowerCase();
+  if(uni.startsWith('k')) uni='kg'; else if(uni.startsWith('l')) uni='litro'; else uni='un';
+  let preco=parseFloat(prompt(`Preço por ${uni} em MT:`)||'0');
+  let est=parseFloat(prompt(`Stock inicial em ${uni}:`)||'0');
+  let min=parseInt(prompt(`Avisar quando for menor que? (5)`)||'5');
+  let ideal=parseInt(prompt(`Stock ideal? (20)`)||'20');
+  let fotoUrl=prompt('Link da foto (ou deixa vazio que baixa online automaticamente):','')||'';
+  if(!fotoUrl) fotoUrl=getFotoProduto(nome);
+  let lista=getProdutos(); lista.push({id:Date.now(), nome, unidade:uni, preco, estoque:est, minStock:min, estoqueIdeal:ideal, foto:fotoUrl});
+  setProdutos(lista); listarProdutos(); if(typeof carregarCatalogo==='function') carregarCatalogo();
+  alert(`Produto ${nome} adicionado com foto!`);
+}
