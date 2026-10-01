@@ -107,7 +107,7 @@ body{background:#f4f6f9}
   <div id="calcResultadoKilo" class="mt-2"></div>
 </div>
 <div class="d-flex gap-2 mb-3"><button onclick="adicionarProduto()" class="btn btn-primary btn-sm">+ Produto</button><button onclick="registrarCompra()" class="btn btn-warning btn-sm">Registrar Compra</button><button onclick="registrarVenda()" class="btn btn-success btn-sm">Registrar Venda</button></div>
-<div class="row"><div class="col-md-8"><table class="table table-sm"><thead class="table-dark"><tr><th>Produto</th><th>Preço</th><th>Estoque</th><th>Valor Stock</th></tr></thead><tbody id="tabelaProdutos"></tbody></table></div><div class="col-md-4"><h6>Estoque por Produto (Pizza Estoque)</h6><canvas id="graficoEstoque" height="250"></canvas></div></div>
+<div class="row"><div class="col-md-8"><table class="table table-sm"><thead class="table-dark"><tr><th>Produto</th><th>Preço</th><th>Estoque</th><th>Valor Stock</th><th>Status</th></tr></thead><tbody id="tabelaProdutos"></tbody></table></div><div class="col-md-4"><h6>Estoque por Produto (Pizza Estoque)</h6><canvas id="graficoEstoque" height="250"></canvas></div></div>
 </div>
 
 <!-- ABA VENDAS -->
@@ -137,6 +137,6 @@ body{background:#f4f6f9}
 <!-- SISTEMA CLIENTE -->
 <div id="sistemaCliente" style="display:none;"><div class="bg-primary text-white p-3 d-flex justify-content-between"><b>Catálogo</b><button onclick="logout()" class="btn btn-light btn-sm">Voltar</button></div><div class="container mt-3"><div id="gridProdutos" class="row"></div></div></div>
 
-<script src="script.js?v=12"></script>
+<script src="script.js?v=13"></script>
 </body>
 </html>
