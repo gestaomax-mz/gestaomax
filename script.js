@@ -208,3 +208,82 @@ function registrarVenda(){}
 function registrarCompra(){}
 function gerarRecibo(){}
 function gerarTodosRecibos(){}
+
+// --- PATCH FUNCIONARIO E CLIENTE - OBRIGATORIO ---
+function entrarFunc(){
+  let codInput = document.getElementById('codFunc');
+  if(!codInput){ alert('Campo nao encontrado'); return; }
+  let cod = codInput.value.trim().toLowerCase();
+  if(!cod){ alert('Digite seu nome ou codigo'); return; }
+  let funcs = getFuncionariosEmpresa();
+  if(funcs.length === 0){
+    funcs = JSON.parse(localStorage.getItem('funcionariosRH')||'[]');
+  }
+  let f = funcs.find(x=> (x.nome||'').toLowerCase().includes(cod)) || funcs.find(x=> String(x.id).includes(cod));
+  if(!f){
+    alert('Funcionário "'+cod+'" não encontrado. Cadastre primeiro como Dono.');
+    return;
+  }
+  document.getElementById('telaLogin').style.display='none';
+  document.getElementById('sistema').style.display='none';
+  document.getElementById('sistemaCliente').style.display='none';
+  let telaFunc = document.getElementById('sistemaFunc');
+  if(telaFunc) telaFunc.style.display='block';
+  let dadosDiv = document.getElementById('dadosFunc');
+  if(dadosDiv){
+    let bruto = (parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0);
+    let desconto = (parseFloat(f.faltas)||0)*((parseFloat(f.salario)||0)/30);
+    let liquido = bruto - desconto;
+    if(liquido < 0) liquido = 0;
+    dadosDiv.innerHTML = `
+      <div style="text-align:center;margin-bottom:15px"><div style="width:70px;height:70px;background:#0d6efd;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;margin:auto">${f.nome.charAt(0)}</div><h4 class="mt-2">${f.nome}</h4><small class="text-muted">${f.departamento} - ${f.tipo==='EMP'?'Empresa':'Escola'}</small></div>
+      <p><b>Salário Base:</b> ${(f.salario||0).toFixed(2)} MT</p>
+      <p><b>Bônus:</b> ${(f.bonus||0).toFixed(2)} MT</p>
+      <p><b>Faltas:</b> ${f.faltas||0}</p>
+      <p><b>Bruto:</b> ${bruto.toFixed(2)} MT</p>
+      <p style="font-size:18px"><b>Líquido a receber:</b> <span style="color:green">${liquido.toFixed(2)} MT</span></p>
+      <hr><p class="small text-muted">Empresa: ${getEmpresaAtual()}</p>
+    `;
+  }
+}
+
+function entrarCliente(){
+  document.getElementById('telaLogin').style.display='none';
+  document.getElementById('sistema').style.display='none';
+  document.getElementById('sistemaFunc').style.display='none';
+  let telaCli = document.getElementById('sistemaCliente');
+  if(telaCli) telaCli.style.display='block';
+  // carrega produtos se houver
+  if(typeof carregarCatalogo === 'function') carregarCatalogo();
+}
+
+function logout(){
+  document.getElementById('sistema').style.display='none';
+  document.getElementById('sistemaFunc').style.display='none';
+  document.getElementById('sistemaCliente').style.display='none';
+  document.getElementById('telaLogin').style.display='block';
+  let lic = verificarLicenca();
+  if(!lic.ok) telaLicenca();
+}
+
+// Garante que os botoes de role existam
+function setRole(r){
+  document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('ativo'));
+  let btn = document.getElementById('r'+r.charAt(0).toUpperCase()+r.slice(1));
+  if(btn) btn.classList.add('ativo');
+  document.getElementById('loginDono').style.display = r==='admin'?'block':'none';
+  document.getElementById('loginFunc').style.display = r==='func'?'block':'none';
+  document.getElementById('loginCliente').style.display = r==='cliente'?'block':'none';
+}
+function fazerLogin(){
+  let u = document.getElementById('usuario').value;
+  let s = document.getElementById('senha').value;
+  if(u==='admin' && s==='1234'){
+    document.getElementById('telaLogin').style.display='none';
+    document.getElementById('sistema').style.display='block';
+    listarFuncionarios();
+  }else{
+    let err = document.getElementById('erroLogin');
+    if(err) err.style.display='block';
+  }
+}
