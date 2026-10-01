@@ -94,49 +94,6 @@ function setFuncionariosEmpresa(arr){
 }
 function getProdutos(){ return JSON.parse(localStorage.getItem('produtos_'+getEmpresaAtual())||'[]'); }
 function setProdutos(arr){ localStorage.setItem('produtos_'+getEmpresaAtual(), JSON.stringify(arr)); }
-
-function getDepartamentosPorTipo(tipo){
-  if(tipo === 'ESC'){
-    return ["Direção Geral","Direção Pedagógica","Secretaria","Professores","Financeiro / Tesouraria","Recursos Humanos","Limpeza / Higiene","Segurança","Cantina / Cozinha","Biblioteca","TI / Informática","Disciplina / Supervisão","Desporto / Cultura","Manutenção"];
-  }
-  if(tipo === 'LOJA'){
-    return ["Gerência","Vendas","Caixa","Estoque / Armazém","Atendimento ao Cliente","Marketing","Financeiro","Logística / Entregas","Compras","Segurança","Limpeza"];
-  }
-  // EMP = Empresa padrão
-  return ["Administração","Financeiro","Vendas","Marketing","Recursos Humanos","Operações","TI / Sistemas","Logística","Atendimento","Produção","Contabilidade","Jurídico","Compras","Qualidade","Manutenção","Direção"];
-}
-
-function atualizarDepartamentos(){
-  let tipo = document.getElementById('tipoInstituicao')?.value;
-  let depSelect = document.getElementById('departamento');
-  let filtroSelect = document.getElementById('Direcao');
-  if(!depSelect) return;
-  depSelect.innerHTML = '<option value="">Escolha Departamento</option>';
-  if(filtroSelect) filtroSelect.innerHTML = '<option value="">Filtrar Departamento (Todos)</option>';
-  
-  if(!tipo){
-    depSelect.innerHTML = '<option value="">Primeiro escolha o Tipo (Empresa/Escola/Loja)</option>';
-    return;
-  }
-  let lista = getDepartamentosPorTipo(tipo);
-  lista.forEach(d=>{
-    let opt = document.createElement('option'); opt.value = d; opt.textContent = d;
-    depSelect.appendChild(opt);
-    if(filtroSelect){
-      let opt2 = document.createElement('option'); opt2.value = d; opt2.textContent = d;
-      filtroSelect.appendChild(opt2);
-    }
-  });
-  // Adiciona todos os outros também no filtro pra poder filtrar tudo
-  if(filtroSelect){
-    let todos = [...new Set([...getDepartamentosPorTipo('EMP'), ...getDepartamentosPorTipo('ESC'), ...getDepartamentosPorTipo('LOJA')])].sort();
-    filtroSelect.innerHTML = '<option value="">Filtrar Departamento (Todos)</option>';
-    todos.forEach(d=>{
-      let o = document.createElement('option'); o.value=d; o.textContent=d; filtroSelect.appendChild(o);
-    });
-  }
-}
-
 document.addEventListener('DOMContentLoaded', ()=>{
   let lic = verificarLicenca();
   if(!lic.ok){
@@ -151,6 +108,41 @@ document.addEventListener('DOMContentLoaded', ()=>{
   listarFuncionarios(); listarProdutos(); listarVendas(); listarCompras();
 });
 window.funcionarios = getFuncionariosEmpresa();
+
+function getDepartamentosPorTipo(tipo){
+  if(tipo==='ESC'){
+    return ["Direção Geral","Direção Pedagógica","Secretaria","Professores","Financeiro / Tesouraria","Recursos Humanos","Limpeza / Higiene","Segurança","Cantina / Cozinha","Biblioteca","TI / Informática","Disciplina / Supervisão","Desporto / Cultura","Manutenção"];
+  }
+  if(tipo==='LOJA'){
+    return ["Gerência","Vendas","Caixa","Estoque / Armazém","Atendimento ao Cliente","Marketing","Financeiro","Logística / Entregas","Compras","Segurança","Limpeza"];
+  }
+  return ["Administração","Financeiro","Vendas","Marketing","Recursos Humanos","Operações","TI / Sistemas","Logística","Atendimento","Produção","Contabilidade","Jurídico","Compras","Qualidade","Manutenção","Direção"];
+}
+
+function getSalarioSeguro(f){ 
+  return parseFloat(f.salario ?? f.salarioBase ?? f.base ?? f.vencimento ?? 0) || 0; 
+}
+
+window.atualizarDepartamentos=function(){
+  let tipo=document.getElementById('tipoInstituicao')?.value;
+  let depSelect=document.getElementById('departamento');
+  let filtroSelect=document.getElementById('Direcao');
+  if(!depSelect) return;
+  depSelect.innerHTML='<option value="">Escolha Departamento</option>';
+  if(!tipo){
+    depSelect.innerHTML='<option value="">Primeiro escolha o Tipo (Empresa/Escola/Loja)</option>';
+    return;
+  }
+  let lista=getDepartamentosPorTipo(tipo);
+  lista.forEach(d=>{
+    let opt=document.createElement('option'); opt.value=d; opt.textContent=d; depSelect.appendChild(opt);
+  });
+  if(filtroSelect){
+    let todos=[...new Set([...getDepartamentosPorTipo('EMP'),...getDepartamentosPorTipo('ESC'),...getDepartamentosPorTipo('LOJA')])].sort();
+    filtroSelect.innerHTML='<option value="">Filtrar Departamento (Todos)</option>';
+    todos.forEach(d=>{ let o=document.createElement('option'); o.value=d; o.textContent=d; filtroSelect.appendChild(o); });
+  }
+}
 
 function mostrarAba(id){
   document.querySelectorAll('.aba').forEach(el=>{ el.classList.remove('ativa'); el.style.display='none'; });
@@ -252,10 +244,6 @@ function carregarCatalogo(){ listarProdutos(); }
 function exportarFuncionarios(){ let lista = getFuncionariosEmpresa(); if(lista.length===0){ alert('Nenhum funcionario'); return; } let csv = "Nome,Tipo,Departamento,Salario,Bonus,Faltas,Bruto,Liquido\n"; lista.forEach(f=>{ let bruto = (parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0); let liq = bruto - ((parseFloat(f.faltas)||0)*((parseFloat(f.salario)||0)/30)); if(liq<0) liq=0; csv += `"${f.nome}","${f.tipo}","${f.departamento}",${f.salario},${f.bonus},${f.faltas},${bruto.toFixed(2)},${liq.toFixed(2)}\n`; }); let blob = new Blob([csv], {type:'text/csv;charset=utf-8;'}); let url = URL.createObjectURL(blob); let a = document.createElement('a'); a.href=url; a.download=`funcionarios_${getEmpresaAtual()}_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url); }
 function exportarFolha(){ exportarFuncionarios(); }
 function imprimirFolha(){ let lista = getFuncionariosEmpresa(); let w = window.open('','','width=800,height=600'); let html = `<html><head><title>Folha ${getEmpresaAtual()}</title><style>body{font-family:Arial} table{width:100%;border-collapse:collapse} th,td{border:1px solid #ccc;padding:8px} th{background:#0d6efd;color:white}</style></head><body><h2>Folha - ${getEmpresaAtual()}</h2><table><tr><th>Nome</th><th>Depto</th><th>Base</th><th>Bonus</th><th>Faltas</th><th>Liquido</th></tr>`; lista.forEach(f=>{ let liq = (parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0) - ((parseFloat(f.faltas)||0)*((parseFloat(f.salario)||0)/30)); if(liq<0) liq=0; html+=`<tr><td>${f.nome}</td><td>${f.departamento}</td><td>${f.salario}</td><td>${f.bonus}</td><td>${f.faltas}</td><td>${liq.toFixed(2)} MT</td></tr>`; }); html+=`</table><script>window.print();<\/script></body></html>`; w.document.write(html); w.document.close(); }
-function getSalarioSeguro(f){
-  // tenta todas as variações possíveis que já usamos
-  return parseFloat(f.salario ?? f.salarioBase ?? f.base ?? f.vencimento ?? f.salario_base ?? 0);
-}
 
 function gerarTodosRecibos(){
   let lista = getFuncionariosEmpresa();
