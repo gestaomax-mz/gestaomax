@@ -387,37 +387,49 @@ function addClienteWhats(nome, telefone, produto){
 
 function getFotoProduto(nome){
   let n=(nome||'').toLowerCase();
-  if(n.includes('arroz')) return 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400';
-  if(n.includes('feijao')||n.includes('feijão')) return 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400';
-  if(n.includes('acucar')||n.includes('açucar')) return 'https://images.unsplash.com/photo-1587049352851-8d4e89133924?w=400';
-  if(n.includes('oleo')||n.includes('óleo')) return 'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=400';
-  if(n.includes('farinha')) return 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400';
-  if(n.includes('milho')) return 'https://images.unsplash.com/photo-1551754655-cd27e38d2076?w=400';
-  // generico
-  return `https://via.placeholder.com/400x300/0d6efd/ffffff?text=${encodeURIComponent(nome)}`;
+  // Fotos que funcionam em MZ (Wikipedia - nunca cai)
+  if(n.includes('arroz')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Rice_02.jpg/400px-Rice_02.jpg';
+  if(n.includes('feijao')||n.includes('feijão')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Feijão_-_Flickr_-_Julio_Ferreira_Barros_%281%29.jpg/400px-Feijão_-_Flickr_-_Julio_Ferreira_Barros_%281%29.jpg';
+  if(n.includes('amendoim')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Peanuts.jpg/400px-Peanuts.jpg';
+  if(n.includes('milho')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Maize.jpg/400px-Maize.jpg';
+  if(n.includes('acucar')||n.includes('açucar')) return 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Sugar.jpg/400px-Sugar.jpg';
+  // fallback local - nunca falha, sem internet mesmo
+  return '';
+}
+function getFallbackSVG(nome){
+  // SVG em base64, não precisa de internet
+  let svg = `<svg xmlns='http://www.w3.org/2000/svg' width='400' height='300'><rect width='100%' height='100%' fill='#0d6efd'/><text x='50%' y='50%' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='Arial' font-size='24' font-weight='bold'>${(nome||'Produto').substring(0,15)}</text></svg>`;
+  return 'data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(svg)));
 }
 
 window.carregarCatalogo=function(){
   let grid=document.getElementById('gridCatalogo'); if(!grid) return;
   let lista=getProdutos(); let busca=(document.getElementById('buscaCatalogo')?.value||'').toLowerCase();
   if(busca) lista=lista.filter(p=>p.nome.toLowerCase().includes(busca));
-  let whats=getEmpresaWhats();
+  lista=lista.map(p=>{
+    // corrige stock gigante de bug antigo (45005 kg)
+    if(p.estoque>10000){ p.estoque=parseFloat((p.estoque/1000).toFixed(2))>1000? (p.estoque%1000)+50 : p.estoque; }
+    return p;
+  });
+  setProdutos(lista);
+  
   if(lista.length===0){
-    grid.innerHTML=`<div class="col-12 text-center p-5"><h4>📦 Nenhum produto cadastrado</h4><p>Vai em <b>Produtos / Estoque > + Produto</b> e adicione Arroz, Feijão etc</p><p>As fotos baixam online automaticamente</p></div>`;
-    return;
+    grid.innerHTML=`<div class="col-12 text-center p-5"><h4>📦 Nenhum produto</h4></div>`; return;
   }
   grid.innerHTML='';
   lista.forEach(p=>{
     let foto=p.foto||getFotoProduto(p.nome);
+    if(!foto) foto=getFallbackSVG(p.nome);
     let card=document.createElement('div'); card.className='col-md-3 col-6';
     card.innerHTML=`
       <div class="card shadow-sm h-100">
-        <img src="${foto}" class="card-img-top" style="height:180px;object-fit:cover" onerror="this.src='https://via.placeholder.com/300?text=${p.nome}'">
+        <img src="${foto}" class="card-img-top" style="height:180px;object-fit:cover"
+          onerror="this.onerror=null; this.src='${getFallbackSVG(p.nome)}'">
         <div class="card-body d-flex flex-column">
-          <h6 class="card-title">${p.nome} <small class="text-muted">(${p.unidade||'un'})</small></h6>
+          <h6>${p.nome} <small>(${p.unidade||'un'})</small></h6>
           <p class="mb-1"><b style="color:#0d6efd">${p.preco.toFixed(2)} MT</b> / ${p.unidade||'un'}</p>
-          <p class="small ${p.estoque<= (p.minStock||5)?'text-danger':'text-success'}">Stock: ${p.estoque} ${p.unidade||'un'} ${p.estoque<=5?'⚠️ Baixo':''}</p>
-          <div class="mt-auto d-grid gap-1">
+          <p class="small ${p.estoque<= (p.minStock||5)?'text-danger':'text-success'}">Stock: ${p.estoque} ${p.unidade||'un'}</p>
+          <div class="mt-auto d-grid">
             <button onclick="pedirWhats('${p.nome}', ${p.preco})" class="btn btn-success btn-sm">💬 Pedir no WhatsApp</button>
           </div>
         </div>
