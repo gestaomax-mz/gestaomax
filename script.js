@@ -209,8 +209,43 @@ function carregarCatalogo(){ listarProdutos(); }
 function exportarFuncionarios(){ let lista = getFuncionariosEmpresa(); if(lista.length===0){ alert('Nenhum funcionario'); return; } let csv = "Nome,Tipo,Departamento,Salario,Bonus,Faltas,Bruto,Liquido\n"; lista.forEach(f=>{ let bruto = (parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0); let liq = bruto - ((parseFloat(f.faltas)||0)*((parseFloat(f.salario)||0)/30)); if(liq<0) liq=0; csv += `"${f.nome}","${f.tipo}","${f.departamento}",${f.salario},${f.bonus},${f.faltas},${bruto.toFixed(2)},${liq.toFixed(2)}\n`; }); let blob = new Blob([csv], {type:'text/csv;charset=utf-8;'}); let url = URL.createObjectURL(blob); let a = document.createElement('a'); a.href=url; a.download=`funcionarios_${getEmpresaAtual()}_${new Date().toISOString().slice(0,10)}.csv`; a.click(); URL.revokeObjectURL(url); }
 function exportarFolha(){ exportarFuncionarios(); }
 function imprimirFolha(){ let lista = getFuncionariosEmpresa(); let w = window.open('','','width=800,height=600'); let html = `<html><head><title>Folha ${getEmpresaAtual()}</title><style>body{font-family:Arial} table{width:100%;border-collapse:collapse} th,td{border:1px solid #ccc;padding:8px} th{background:#0d6efd;color:white}</style></head><body><h2>Folha - ${getEmpresaAtual()}</h2><table><tr><th>Nome</th><th>Depto</th><th>Base</th><th>Bonus</th><th>Faltas</th><th>Liquido</th></tr>`; lista.forEach(f=>{ let liq = (parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0) - ((parseFloat(f.faltas)||0)*((parseFloat(f.salario)||0)/30)); if(liq<0) liq=0; html+=`<tr><td>${f.nome}</td><td>${f.departamento}</td><td>${f.salario}</td><td>${f.bonus}</td><td>${f.faltas}</td><td>${liq.toFixed(2)} MT</td></tr>`; }); html+=`</table><script>window.print();<\/script></body></html>`; w.document.write(html); w.document.close(); }
-function gerarRecibo(){ let nome = prompt('Recibo para funcionario:'); if(!nome) return; let f = getFuncionariosEmpresa().find(x=> x.nome.toLowerCase().includes(nome.toLowerCase())); if(!f){ alert('Nao encontrado'); return; } let bruto = (parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0); let desconto = (parseFloat(f.faltas)||0)*((parseFloat(f.salario)||0)/30); let liquido = bruto - desconto; if(liquido<0) liquido=0; let w = window.open('','','width=600,height=700'); w.document.write(`<html><body><div style="border:2px solid #000;padding:20px"><h2>RECIBO - ${getEmpresaAtual()}</h2><p>Funcionario: ${f.nome}</p><p>Depto: ${f.departamento}</p><p>Base: ${f.salario} MT</p><p>Bonus: ${f.bonus} MT</p><p>Faltas: ${f.faltas}</p><h3>Liquido: ${liquido.toFixed(2)} MT</h3><p>Data: ${new Date().toLocaleDateString()}</p><p>Ass: ___________________</p></div><script>window.print()<\/script></body></html>`); w.document.close(); }
-function gerarTodosRecibos(){ let lista = getFuncionariosEmpresa(); if(lista.length===0){ alert('Sem funcionarios'); return; } let w = window.open('','','width=800,height=900'); let html = `<html><body><h1>Recibos - ${getEmpresaAtual()}</h1>`; lista.forEach(f=>{ let liq = (parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0) - ((parseFloat(f.faltas)||0)*((parseFloat(f.salario)||0)/30)); if(liq<0) liq=0; html+=`<div style="border:1px solid #000;padding:15px;margin-bottom:20px;"><h3>${f.nome} - ${f.departamento}</h3><p>Liquido: ${liq.toFixed(2)} MT</p></div>`; }); html+=`<script>window.print()<\/script></body></html>`; w.document.write(html); w.document.close(); }
+function getSalarioSeguro(f){
+  // tenta todas as variações possíveis que já usamos
+  return parseFloat(f.salario ?? f.salarioBase ?? f.base ?? f.vencimento ?? f.salario_base ?? 0);
+}
+
+function gerarTodosRecibos(){
+  let lista = getFuncionariosEmpresa();
+  if(lista.length===0){ alert('Sem funcionarios'); return; }
+  let w = window.open('','','width=800,height=900');
+  let html = `<html><head><style>body{font-family:Arial}.recibo{border:1px solid #000;padding:15px;margin-bottom:20px;page-break-after:always}</style></head><body><h1>Recibos - ${getEmpresaAtual()} - ${new Date().toLocaleDateString()}</h1>`;
+  lista.forEach(f=>{
+    let salarioNum = getSalarioSeguro(f);
+    let bonusNum = parseFloat(f.bonus ?? f.bonusBase ?? 0);
+    let faltasNum = parseInt(f.faltas ?? 0);
+    let bruto = salarioNum + bonusNum;
+    let desconto = faltasNum * (salarioNum/30);
+    let liq = bruto - desconto; if(liq<0) liq=0;
+    html+=`<div class="recibo"><h3>${f.nome} - ${f.departamento}</h3><p>Base: ${salarioNum.toFixed(2)} MT | Bonus: ${bonusNum.toFixed(2)} MT | Faltas: ${faltasNum}</p><p><b>Liquido: ${liq.toFixed(2)} MT</b></p><p>Ass: ___________________</p></div>`;
+  });
+  html+=`<script>window.print()<\/script></body></html>`;
+  w.document.write(html); w.document.close();
+}
+
+function gerarRecibo(){
+  let nome = prompt('Recibo para funcionario (nome):'); if(!nome) return;
+  let f = getFuncionariosEmpresa().find(x=> x.nome.toLowerCase().includes(nome.toLowerCase()));
+  if(!f){ alert('Funcionario nao encontrado'); return; }
+  let salarioNum = getSalarioSeguro(f);
+  let bonusNum = parseFloat(f.bonus ?? 0);
+  let faltasNum = parseInt(f.faltas ?? 0);
+  let bruto = salarioNum + bonusNum;
+  let desconto = faltasNum * (salarioNum/30);
+  let liquido = bruto - desconto; if(liquido<0) liquido=0;
+  let w = window.open('','','width=600,height=700');
+  w.document.write(`<html><head><style>body{font-family:Arial;padding:20px}.recibo{border:2px solid #000;padding:20px}</style></head><body><div class="recibo"><h2>RECIBO SALARIAL - ${getEmpresaAtual()}</h2><p><b>Funcionario:</b> ${f.nome}</p><p><b>Departamento:</b> ${f.departamento}</p><p><b>Salario Base:</b> ${salarioNum.toFixed(2)} MT</p><p><b>Bonus:</b> ${bonusNum.toFixed(2)} MT</p><p><b>Faltas:</b> ${faltasNum}</p><p><b>Bruto:</b> ${bruto.toFixed(2)} MT</p><p><b>Desconto Faltas:</b> ${desconto.toFixed(2)} MT</p><h3>Liquido: ${liquido.toFixed(2)} MT</h3><p>Data: ${new Date().toLocaleDateString()}</p><br><br><p>Assinatura: ___________________________</p></div><script>window.print()<\/script></body></html>`);
+  w.document.close();
+}
 function mostrarInteligencia(){ let lista = getFuncionariosEmpresa(); let totalBruto = lista.reduce((s,f)=> s + ((parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0)), 0); let totalLiquido = lista.reduce((s,f)=>{ let b=(parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0); let d=(parseFloat(f.faltas)||0)*((parseFloat(f.salario)||0)/30); let l=b-d; if(l<0)l=0; return s+l; },0); let vendas = JSON.parse(localStorage.getItem('vendas_'+getEmpresaAtual())||'[]'); let compras = JSON.parse(localStorage.getItem('compras_'+getEmpresaAtual())||'[]'); let totalVendas = vendas.reduce((s,v)=>s+(v.total||0),0); let totalCompras = compras.reduce((s,c)=>s+(c.total||0),0); let produtos = getProdutos(); let valorEstoque = produtos.reduce((s,p)=>s+((p.preco||0)*(p.estoque||0)),0); let div = document.getElementById('inteligenciaDados'); if(div) div.innerHTML = `<p><b>Total Funcionarios:</b> ${lista.length}</p><p><b>Folha Bruta:</b> ${totalBruto.toFixed(2)} MT</p><p><b>Folha Liquida:</b> ${totalLiquido.toFixed(2)} MT</p><p><b>Valor Estoque:</b> ${valorEstoque.toFixed(2)} MT</p><p><b>Total Vendas:</b> ${totalVendas.toFixed(2)} MT</p><p><b>Total Compras:</b> ${totalCompras.toFixed(2)} MT</p><p><b>Lucro:</b> ${(totalVendas - totalCompras).toFixed(2)} MT</p>`; }
 function entrarFunc(){
   let codInput = document.getElementById('codFunc'); if(!codInput){ alert('Campo nao encontrado'); return; }
