@@ -135,8 +135,31 @@ body{background:#f4f6f9}
 <div id="sistemaFunc" style="display:none;" class="container mt-4"><div class="card p-4 shadow" style="max-width:600px;margin:auto;"><div class="d-flex justify-content-between"><h4>Minha Situação</h4><button onclick="logout()" class="btn btn-danger btn-sm">Sair</button></div><div id="dadosFunc"></div></div></div>
 
 <!-- SISTEMA CLIENTE -->
-<div id="sistemaCliente" style="display:none;"><div class="bg-primary text-white p-3 d-flex justify-content-between"><b>Catálogo</b><button onclick="logout()" class="btn btn-light btn-sm">Voltar</button></div><div class="container mt-3"><div id="gridProdutos" class="row"></div></div></div>
-
+<div id="sistemaCliente" style="display:none">
+  <div class="d-flex justify-content-between align-items-center bg-primary text-white p-2">
+    <h4 class="m-0">Catálogo - <span id="catalogoEmpresaNome"></span></h4>
+    <div>
+      <a id="btnWhatsEmpresa" target="_blank" class="btn btn-success btn-sm me-2">💬 WhatsApp Empresa</a>
+      <button onclick="logout()" class="btn btn-light btn-sm">Voltar</button>
+    </div>
+  </div>
+  
+  <div class="container mt-3">
+    <div class="row mb-3">
+      <div class="col-md-4">
+        <input id="inputEmpresaWhats" class="form-control" placeholder="Nº WhatsApp empresa ex: 258841234567">
+        <small class="text-muted">Salvo automaticamente</small>
+      </div>
+      <div class="col-md-8">
+        <input id="buscaCatalogo" class="form-control" placeholder="Pesquisar produto..." oninput="carregarCatalogo()">
+      </div>
+    </div>
+    <div id="gridCatalogo" class="row g-3"></div>
+    
+    <h5 class="mt-4">👥 Clientes que falaram no WhatsApp</h5>
+    <div id="listaClientesWhats" class="table-responsive"></div>
+  </div>
+</div>
 <script src="script.js?v=13"></script>
 </body>
 </html>
