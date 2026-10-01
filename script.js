@@ -95,6 +95,48 @@ function setFuncionariosEmpresa(arr){
 function getProdutos(){ return JSON.parse(localStorage.getItem('produtos_'+getEmpresaAtual())||'[]'); }
 function setProdutos(arr){ localStorage.setItem('produtos_'+getEmpresaAtual(), JSON.stringify(arr)); }
 
+function getDepartamentosPorTipo(tipo){
+  if(tipo === 'ESC'){
+    return ["Direção Geral","Direção Pedagógica","Secretaria","Professores","Financeiro / Tesouraria","Recursos Humanos","Limpeza / Higiene","Segurança","Cantina / Cozinha","Biblioteca","TI / Informática","Disciplina / Supervisão","Desporto / Cultura","Manutenção"];
+  }
+  if(tipo === 'LOJA'){
+    return ["Gerência","Vendas","Caixa","Estoque / Armazém","Atendimento ao Cliente","Marketing","Financeiro","Logística / Entregas","Compras","Segurança","Limpeza"];
+  }
+  // EMP = Empresa padrão
+  return ["Administração","Financeiro","Vendas","Marketing","Recursos Humanos","Operações","TI / Sistemas","Logística","Atendimento","Produção","Contabilidade","Jurídico","Compras","Qualidade","Manutenção","Direção"];
+}
+
+function atualizarDepartamentos(){
+  let tipo = document.getElementById('tipoInstituicao')?.value;
+  let depSelect = document.getElementById('departamento');
+  let filtroSelect = document.getElementById('Direcao');
+  if(!depSelect) return;
+  depSelect.innerHTML = '<option value="">Escolha Departamento</option>';
+  if(filtroSelect) filtroSelect.innerHTML = '<option value="">Filtrar Departamento (Todos)</option>';
+  
+  if(!tipo){
+    depSelect.innerHTML = '<option value="">Primeiro escolha o Tipo (Empresa/Escola/Loja)</option>';
+    return;
+  }
+  let lista = getDepartamentosPorTipo(tipo);
+  lista.forEach(d=>{
+    let opt = document.createElement('option'); opt.value = d; opt.textContent = d;
+    depSelect.appendChild(opt);
+    if(filtroSelect){
+      let opt2 = document.createElement('option'); opt2.value = d; opt2.textContent = d;
+      filtroSelect.appendChild(opt2);
+    }
+  });
+  // Adiciona todos os outros também no filtro pra poder filtrar tudo
+  if(filtroSelect){
+    let todos = [...new Set([...getDepartamentosPorTipo('EMP'), ...getDepartamentosPorTipo('ESC'), ...getDepartamentosPorTipo('LOJA')])].sort();
+    filtroSelect.innerHTML = '<option value="">Filtrar Departamento (Todos)</option>';
+    todos.forEach(d=>{
+      let o = document.createElement('option'); o.value=d; o.textContent=d; filtroSelect.appendChild(o);
+    });
+  }
+}
+
 document.addEventListener('DOMContentLoaded', ()=>{
   let lic = verificarLicenca();
   if(!lic.ok){
