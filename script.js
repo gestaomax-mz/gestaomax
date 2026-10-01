@@ -224,10 +224,20 @@ function entrarFunc(){
   let tFunc = document.getElementById('sistemaFunc'); if(tFunc) tFunc.style.display='block';
   let dadosDiv = document.getElementById('dadosFunc');
   if(dadosDiv){
-    let bruto = (parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0);
-    let desconto = (parseFloat(f.faltas)||0)*((parseFloat(f.salario)||0)/30);
-    let liquido = bruto - desconto; if(liquido<0) liquido=0;
-    dadosDiv.innerHTML = `<h4>${f.nome}</h4><p><b>Depto:</b> ${f.departamento}</p><p><b>Bruto:</b> ${bruto.toFixed(2)} MT</p><p><b>Liquido:</b> <span style="color:green;font-weight:bold">${liquido.toFixed(2)} MT</span></p>`;
+   let salarioNum = parseFloat(f.salario||0);
+   let bonusNum = parseFloat(f.bonus||0);
+   let faltasNum = parseInt(f.faltas||0);
+   let bruto = salarioNum + bonusNum;
+   let desconto = faltasNum * (salarioNum/30);
+   let liquido = bruto - desconto; if(liquido<0) liquido=0;
+   dadosDiv.innerHTML = `
+     <div style="text-align:center;margin-bottom:15px"><div style="width:70px;height:70px;background:#0d6efd;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;margin:auto">${(f.nome||'S').charAt(0)}</div><h4 class="mt-2">${f.nome}</h4><small class="text-muted">${f.departamento} - ${f.tipo}</small></div>
+     <p><b>Salário Base:</b> ${salarioNum.toFixed(2)} MT</p>
+     <p><b>Bônus:</b> ${bonusNum.toFixed(2)} MT</p>
+     <p><b>Faltas:</b> ${faltasNum}</p>
+     <p><b>Bruto:</b> ${bruto.toFixed(2)} MT</p>
+    <p style="font-size:18px"><b>Líquido:</b> <span style="color:green">${liquido.toFixed(2)} MT</span></p>
+`;
   }
 }
 
