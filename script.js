@@ -214,36 +214,20 @@ function entrarFunc(){
   let codInput = document.getElementById('codFunc');
   if(!codInput){ alert('Campo nao encontrado'); return; }
   let cod = codInput.value.trim().toLowerCase();
-  if(!cod){ alert('Digite seu nome ou codigo'); return; }
+  if(!cod){ alert('Digite seu nome'); return; }
   let funcs = getFuncionariosEmpresa();
-  if(funcs.length === 0){
-    funcs = JSON.parse(localStorage.getItem('funcionariosRH')||'[]');
-  }
-  let f = funcs.find(x=> (x.nome||'').toLowerCase().includes(cod)) || funcs.find(x=> String(x.id).includes(cod));
-  if(!f){
-    alert('Funcionário "'+cod+'" não encontrado. Cadastre primeiro como Dono.');
-    return;
-  }
-  document.getElementById('telaLogin').style.display='none';
-  document.getElementById('sistema').style.display='none';
-  document.getElementById('sistemaCliente').style.display='none';
-  let telaFunc = document.getElementById('sistemaFunc');
-  if(telaFunc) telaFunc.style.display='block';
+  let f = funcs.find(x=> (x.nome||'').toLowerCase().includes(cod));
+  if(!f){ alert('Funcionario "'+cod+'" nao encontrado. Cadastre como Dono primeiro.'); return; }
+  let tLogin = document.getElementById('telaLogin'); if(tLogin) tLogin.style.display='none';
+  let tSis = document.getElementById('sistema'); if(tSis) tSis.style.display='none';
+  let tCli = document.getElementById('sistemaCliente'); if(tCli) tCli.style.display='none';
+  let tFunc = document.getElementById('sistemaFunc'); if(tFunc) tFunc.style.display='block';
   let dadosDiv = document.getElementById('dadosFunc');
   if(dadosDiv){
     let bruto = (parseFloat(f.salario)||0)+(parseFloat(f.bonus)||0);
     let desconto = (parseFloat(f.faltas)||0)*((parseFloat(f.salario)||0)/30);
-    let liquido = bruto - desconto;
-    if(liquido < 0) liquido = 0;
-    dadosDiv.innerHTML = `
-      <div style="text-align:center;margin-bottom:15px"><div style="width:70px;height:70px;background:#0d6efd;color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;margin:auto">${f.nome.charAt(0)}</div><h4 class="mt-2">${f.nome}</h4><small class="text-muted">${f.departamento} - ${f.tipo==='EMP'?'Empresa':'Escola'}</small></div>
-      <p><b>Salário Base:</b> ${(f.salario||0).toFixed(2)} MT</p>
-      <p><b>Bônus:</b> ${(f.bonus||0).toFixed(2)} MT</p>
-      <p><b>Faltas:</b> ${f.faltas||0}</p>
-      <p><b>Bruto:</b> ${bruto.toFixed(2)} MT</p>
-      <p style="font-size:18px"><b>Líquido a receber:</b> <span style="color:green">${liquido.toFixed(2)} MT</span></p>
-      <hr><p class="small text-muted">Empresa: ${getEmpresaAtual()}</p>
-    `;
+    let liquido = bruto - desconto; if(liquido<0) liquido=0;
+    dadosDiv.innerHTML = `<h4>${f.nome}</h4><p><b>Depto:</b> ${f.departamento}</p><p><b>Bruto:</b> ${bruto.toFixed(2)} MT</p><p><b>Liquido:</b> <span style="color:green;font-weight:bold">${liquido.toFixed(2)} MT</span></p>`;
   }
 }
 
