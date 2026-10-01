@@ -84,6 +84,28 @@ body{background:#f4f6f9}
 <!-- ABA PRODUTOS -->
 <div id="abaProdutos" class="aba card p-3 shadow-sm">
 <h5>Produtos / Estoque</h5>
+  <!-- ALERTA STOCK BAIXO v12 -->
+<div id="alertasStock" class="mb-3"></div>
+
+<!-- CALCULADORA DE KILOS v12 -->
+<div class="card p-3 mb-3 shadow-sm" style="border-left:4px solid #20c997">
+  <h5>⚖️ Calculadora KG / Litro - Venda por Valor</h5>
+  <p class="text-muted small">Para produtos que se medem (arroz, açúcar, óleo, farinha)</p>
+  <div class="row g-2">
+    <div class="col-md-5">
+      <select id="calcProdutoKilo" class="form-select" onchange="calcularKilos()">
+        <option value="">Escolha produto por KG</option>
+      </select>
+    </div>
+    <div class="col-md-4">
+      <input id="calcValorCliente" type="number" class="form-control" placeholder="Cliente quer pagar quanto? MT" oninput="calcularKilos()">
+    </div>
+    <div class="col-md-3">
+      <button onclick="calcularKilos()" class="btn btn-success w-100">Calcular</button>
+    </div>
+  </div>
+  <div id="calcResultadoKilo" class="mt-2"></div>
+</div>
 <div class="d-flex gap-2 mb-3"><button onclick="adicionarProduto()" class="btn btn-primary btn-sm">+ Produto</button><button onclick="registrarCompra()" class="btn btn-warning btn-sm">Registrar Compra</button><button onclick="registrarVenda()" class="btn btn-success btn-sm">Registrar Venda</button></div>
 <div class="row"><div class="col-md-8"><table class="table table-sm"><thead class="table-dark"><tr><th>Produto</th><th>Preço</th><th>Estoque</th><th>Valor Stock</th></tr></thead><tbody id="tabelaProdutos"></tbody></table></div><div class="col-md-4"><h6>Estoque por Produto (Pizza Estoque)</h6><canvas id="graficoEstoque" height="250"></canvas></div></div>
 </div>
