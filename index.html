@@ -94,7 +94,14 @@ function atualizarDepartamentos(){
 document.addEventListener('DOMContentLoaded',()=>{let t=document.getElementById('tipoInstituicao'); if(t) t.addEventListener('change',atualizarDepartamentos);});
 function setRole(r){roleAtual=r;document.querySelectorAll('.role-btn').forEach(b=>b.classList.remove('ativo'));document.getElementById('r'+r.charAt(0).toUpperCase()+r.slice(1)).classList.add('ativo');document.getElementById('loginDono').style.display=r==='admin'?'block':'none';document.getElementById('loginFunc').style.display=r==='func'?'block':'none';document.getElementById('loginCliente').style.display=r==='cliente'?'block':'none';}
 function fazerLogin(){if(document.getElementById('usuario').value==='admin'&&document.getElementById('senha').value==='1234'){document.getElementById('telaLogin').style.display='none';document.getElementById('sistema').style.display='block';listarFuncionarios();}else{document.getElementById('erroLogin').style.display='block';}}
-function logout(){document.getElementById('sistema').style.display='none';document.getElementById('telaLogin').style.display='block';}
+function logout(){
+  let t1 = document.getElementById('sistema'); if(t1) t1.style.display='none';
+  let t2 = document.getElementById('sistemaFunc'); if(t2) t2.style.display='none';
+  let t3 = document.getElementById('sistemaCliente'); if(t3) t3.style.display='none';
+  let tLogin = document.getElementById('telaLogin'); if(tLogin) tLogin.style.display='block';
+  let lic = verificarLicenca();
+  if(!lic.ok) telaLicenca();
+}
 </script>
     <div id="sistemaFunc" style="display:none;" class="container mt-4">
     <div class="card shadow p-4" style="max-width:600px;margin:auto;">
