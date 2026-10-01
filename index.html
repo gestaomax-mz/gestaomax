@@ -53,8 +53,15 @@ body{background:#f4f6f9}
 <h5>Cadastrar Funcionario</h5>
 <div class="row g-2 mb-3">
 <div class="col-md-2"><input id="nome" class="form-control" placeholder="Nome"></div>
-<div class="col-md-2"><select id="tipoInstituicao" class="form-select"><option value="">Tipo</option><option value="EMP">Empresa</option><option value="ESC">Escola</option></select></div>
-<div class="col-md-2"><select id="departamento" class="form-select"><option value="">Departament</option><option>Financeiro</option><option>Vendas</option><option>TI</option><option>RH</option><option>Marketing</option><option>Operacoes</option></select></div>
+<div class="col-md-2"><select id="tipoInstituicao" class="form-select" onchange="atualizarDepartamentos()">
+  <option value="">Tipo Instituição</option>
+  <option value="EMP">Empresa</option>
+  <option value="ESC">Escola</option>
+  <option value="LOJA">Loja / Comercial</option>
+</select></div>
+<div class="col-md-2"><select id="departamento" class="form-select">
+  <option value="">Primeiro escolha o Tipo</option>
+</select></div>
 <div class="col-md-1"><input id="salario" type="number" class="form-control" placeholder="Salario"></div>
 <div class="col-md-1"><input id="faltas" type="number" class="form-control" placeholder="Faltas"></div>
 <div class="col-md-1"><input id="bonus" type="number" class="form-control" placeholder="Bonus"></div>
@@ -63,7 +70,10 @@ body{background:#f4f6f9}
 
 <div class="row">
 <div class="col-md-8">
-<div class="d-flex gap-2 mb-2"><input id="TC" class="form-control" placeholder="Pesquisar" style="max-width:250px"><select id="Direcao" class="form-select" style="max-width:180px"><option value="">Filtrar Depto</option><option>Financeiro</option><option>Vendas</option><option>TI</option><option>RH</option></select><button onclick="limparFiltros()" class="btn btn-secondary btn-sm">Limpar</button><button onclick="listarFuncionarios()" class="btn btn-success btn-sm">Listar Todos</button></div>
+<div class="d-flex gap-2 mb-2"><input id="TC" class="form-control" placeholder="Pesquisar nome" style="max-width:250px">
+<select id="Direcao" class="form-select" style="max-width:220px">
+  <option value="">Filtrar Departamento (Todos)</option>
+</select><button onclick="limparFiltros()" class="btn btn-secondary btn-sm">Limpar</button><button onclick="listarFuncionarios()" class="btn btn-success btn-sm">Listar Todos</button></div>
 <div class="mb-2"><button onclick="baixarBackup()" class="btn btn-warning btn-sm">Backup</button><input type="file" id="inputBackup" style="display:none" onchange="carregarBackup(event)"><button onclick="document.getElementById('inputBackup').click()" class="btn btn-secondary btn-sm">Carregar</button> <b>Total Folha: <span id="totalFolha">0 MT</span></b></div>
 <div class="table-responsive"><table class="table table-sm"><thead class="table-dark"><tr><th>Nome</th><th>Depto</th><th>Bruto</th><th>Liquido</th><th>Acao</th></tr></thead><tbody id="tabelaFuncionarios"></tbody></table></div>
 </div>
@@ -105,6 +115,6 @@ body{background:#f4f6f9}
 <!-- SISTEMA CLIENTE -->
 <div id="sistemaCliente" style="display:none;"><div class="bg-primary text-white p-3 d-flex justify-content-between"><b>Catálogo</b><button onclick="logout()" class="btn btn-light btn-sm">Voltar</button></div><div class="container mt-3"><div id="gridProdutos" class="row"></div></div></div>
 
-<script src="script.js?v=9"></script>
+<script src="script.js?v=10"></script>
 </body>
 </html>
