@@ -127,7 +127,8 @@ function adicionarFuncionario(){
   let nome = document.getElementById('nome').value.trim();
   let tipo = document.getElementById('tipoInstituicao').value;
   let dep = document.getElementById('departamento').value;
-  let salario = parseFloat(document.getElementById('salario').value) || 0;
+  let salario = parseFloat(document.getElementById('salario').value.replace(',', '.')) || 0;
+  if(salario <= 0){ alert('ERRO: Digite um salario valido maior que 0. Ex: 25000'); document.getElementById('salario').focus(); return; }
   let faltas = parseInt(document.getElementById('faltas').value) || 0;
   let bonus = parseFloat(document.getElementById('bonus').value) || 0;
   if(!nome){ alert('Digite o nome'); return; }
