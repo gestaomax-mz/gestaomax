@@ -1,0 +1,17 @@
+{
+  "name": "GESTAMAX - Sistema de Gestão",
+  "short_name": "GESTAMAX",
+  "start_url": "./index.html?v=15",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d6efd",
+  "description": "Gestão de Funcionários, Stock e Vendas com WhatsApp",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/891/891462.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
