@@ -24,23 +24,29 @@ body{background:#f4f6f9}
 <h4 id="motivoLicenca">Sistema Licenciado</h4><input id="inputChave" class="form-control my-3" placeholder="Digite sua chave ou DEMO"><button onclick="ativarLicenca()" class="btn btn-primary w-100">Ativar</button><div id="areaLicencaInfo" class="mt-3 small"></div>
 </div></div>
 
-<!-- LOGIN -->
+<!-- LOGIN - LIMPO SEM AUTO -->
 <div id="telaLogin" style="display:none;" class="container mt-4"><div class="card p-4 shadow" style="max-width:450px;margin:auto;">
-<div style="background:#0d6efd;color:white;padding:10px;border-radius:8px;text-align:center;margin:-24px -24px 20px -24px;">Sistema Integrado</div>
+<div style="background:#0d6efd;color:white;padding:10px;border-radius:8px;text-align:center;margin:-24px -24px 20px -24px;">GESTAMAX - Acesso Restrito</div>
 <div class="d-flex gap-2 mb-3 justify-content-center">
-<button class="role-btn ativo" id="rAdmin" onclick="setRole('admin')">Sou Dono</button>
+<button class="role-btn ativo" id="rAdmin" onclick="setRole('admin')">Sou Dono/Gerente</button>
 <button class="role-btn" id="rFunc" onclick="setRole('func')">Funcionario</button>
 <button class="role-btn" id="rCliente" onclick="setRole('cliente')">Cliente</button>
 </div>
-<div id="loginDono"><input id="usuario" class="form-control mb-2" value="admin" placeholder="Usuario"><input id="senha" type="password" class="form-control mb-2" value="1234" placeholder="Senha"><button onclick="fazerLogin()" class="btn btn-primary w-100">Entrar</button><p id="erroLogin" style="display:none;color:red" class="mt-2">Dados invalidos</p></div>
-<div id="loginFunc" style="display:none;"><input id="codFunc" class="form-control mb-2" placeholder="Digite seu nome ex: Stephan"><button onclick="entrarFunc()" class="btn btn-success w-100">Ver Minha Situação</button></div>
+<div id="loginDono">
+<input id="usuario" class="form-control mb-2" value="admin" readonly autocomplete="off" style="background:#e9ecef;">
+<input id="senha" type="password" class="form-control mb-2" value="" autocomplete="new-password" placeholder="Senha do Gestor (só Dono/Gerente sabe)">
+<button onclick="fazerLogin()" class="btn btn-primary w-100">Entrar</button>
+<p id="erroLogin" style="display:none;color:red" class="mt-2">Senha incorreta. Só Dono/Gerente tem acesso.</p>
+<small class="text-muted d-block mt-2">Dica: DONO2025 = acesso total + auditoria | GERENTE2025 = acesso total sem auditoria</small>
+</div>
+<div id="loginFunc" style="display:none;"><input id="codFunc" class="form-control mb-2" placeholder="Digite seu nome ex: Stephan" autocomplete="off"><button onclick="entrarFunc()" class="btn btn-success w-100">Ver Minha Situação</button></div>
 <div id="loginCliente" style="display:none;"><button onclick="entrarCliente()" class="btn btn-warning w-100">Ver Catálogo</button></div>
 <a href="#" onclick="telaLicenca('Trocar licença')" class="small mt-2 d-block">Trocar licenca</a>
 </div></div>
 
 <!-- SISTEMA DONO -->
 <div id="sistema" style="display:none;">
-<div style="background:#0d6efd;color:white;padding:12px 20px;" class="d-flex justify-content-between align-items-center"><b>GESTAMAX</b><span><small id="empresaNome"></small> <button onclick="logout()" class="btn btn-danger btn-sm ms-2">Sair</button></span></div>
+<div style="background:#0d6efd;color:white;padding:12px 20px;" class="d-flex justify-content-between align-items-center"><b>GESTAMAX <span id="tipoAcessoBadge" class="badge bg-warning text-dark ms-2"></span></b><span><small id="empresaNome"></small> <button onclick="logout()" class="btn btn-danger btn-sm ms-2">Sair</button></span></div>
 <div class="container-fluid mt-3">
 <div class="d-flex flex-wrap mb-2">
 <div class="nav-tab ativa" onclick="mostrarAba('abaRH')" id="tabRH">RH / Funcionários</div>
@@ -49,6 +55,7 @@ body{background:#f4f6f9}
 <div class="nav-tab" onclick="mostrarAba('abaCompras')" id="tabCompras">Compras</div>
 <div class="nav-tab" onclick="mostrarAba('abaRelatorio')" id="tabRelatorio">Relatórios</div>
 <div class="nav-tab" onclick="mostrarAba('abaInteligencia')" id="tabInteligencia">Inteligência</div>
+<div class="nav-tab" onclick="mostrarAba('abaAuditoria')" id="tabAuditoria" style="display:none;background:#dc3545;color:white;">🔒 Auditoria (Só Dono)</div>
 </div>
 
 <!-- ABA RH -->
@@ -87,10 +94,7 @@ body{background:#f4f6f9}
 <!-- ABA PRODUTOS -->
 <div id="abaProdutos" class="aba card p-3 shadow-sm">
 <h5>Produtos / Estoque</h5>
-  <!-- ALERTA STOCK BAIXO v12 -->
 <div id="alertasStock" class="mb-3"></div>
-
-<!-- CALCULADORA DE KILOS v12 -->
 <div class="card p-3 mb-3 shadow-sm" style="border-left:4px solid #20c997">
   <h5>⚖️ Calculadora KG / Litro - Venda por Valor</h5>
   <p class="text-muted small">Para produtos que se medem (arroz, açúcar, óleo, farinha)</p>
@@ -131,6 +135,18 @@ body{background:#f4f6f9}
 <!-- ABA INTELIGENCIA -->
 <div id="abaInteligencia" class="aba card p-3 shadow-sm"><h5>Inteligência do Negócio</h5><div id="inteligenciaDados"></div></div>
 
+<!-- ABA AUDITORIA - SÓ DONO -->
+<div id="abaAuditoria" class="aba card p-3 shadow-sm" style="border:2px solid #dc3545">
+<h5 style="color:#dc3545">🔒 LOG de Auditoria - Proteção Anti-Fraude (Só Dono vê)</h5>
+<p class="small text-muted">Este log prova quem alterou produtos, funcionários e preços. Só o Dono vê para não ser culpado por fraude do gerente.</p>
+<div class="d-flex gap-2 mb-2">
+<button onclick="listarAuditoria()" class="btn btn-danger btn-sm">Atualizar LOG</button>
+<button onclick="exportarAuditoria()" class="btn btn-dark btn-sm">Exportar LOG CSV</button>
+<button onclick="limparAuditoria()" class="btn btn-outline-danger btn-sm">Limpar LOG (só DONO)</button>
+</div>
+<div id="listaAuditoria" class="table-responsive"></div>
+</div>
+
 </div>
 </div>
 
@@ -163,6 +179,6 @@ body{background:#f4f6f9}
     <div id="listaClientesWhats" class="table-responsive"></div>
   </div>
 </div>
-<script src="script.js?v=16"></script>
+<script src="script.js?v=17"></script>
 </body>
 </html>
